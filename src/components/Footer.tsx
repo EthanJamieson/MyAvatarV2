@@ -49,7 +49,6 @@ const Footer = () => (
           <h4 className="text-sm font-semibold text-foreground mb-3">Product</h4>
           <div className="space-y-2">
             <Link to="/pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">Pricing</Link>
-            <Link to="/pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">Pricing</Link>
             <Link to="/blog" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">Blog</Link>
           </div>
         </div>
