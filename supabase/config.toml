@@ -1,4 +1,13 @@
-project_id = "vvlhzgpjscpquzgbolis"
+project_id = "nmpafdgvjgdypcwpfzxy"
 
 [functions.chat]
+verify_jwt = false
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.initialize-payment]
+verify_jwt = false
+
+[functions.paystack-webhook]
 verify_jwt = false
