@@ -1,5 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.99.2";
 
+const SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send";
+const FROM_EMAIL = "studio@myavatar.co.za";
+const FROM_NAME = "MyAvatar Studio";
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -73,6 +77,59 @@ Deno.serve(async (req) => {
     if (upsertError) {
       console.error("Failed to upsert order:", upsertError);
       return new Response(JSON.stringify({ error: "Database error" }), { status: 500 });
+    }
+
+    const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
+    const customerEmail = data.customer?.email || data.email;
+    if (SENDGRID_API_KEY && customerEmail) {
+      const customerName = metadata.customer_name || "there";
+      const productName = metadata.product || "your selected package";
+      const formattedAmount = `R${amountInRands.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const reference = data.reference || "N/A";
+
+      const emailPayload = {
+        personalizations: [{ to: [{ email: customerEmail }] }],
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        subject: "Payment received - MyAvatar Studio",
+        content: [
+          {
+            type: "text/html",
+            value: `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                <h2 style="color:#0ea5e9;margin-bottom:12px;">Thank you for choosing MyAvatar Studio</h2>
+                <p style="color:#333;line-height:1.6;">Hi ${customerName},</p>
+                <p style="color:#333;line-height:1.6;">
+                  We have received your payment and your order is now in our production queue.
+                  Our team will be in touch shortly with the next steps.
+                </p>
+                <div style="margin:20px 0;padding:14px;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 8px;color:#111;font-weight:bold;">Payment details</p>
+                  <p style="margin:0;color:#333;">Product: ${productName}</p>
+                  <p style="margin:6px 0 0;color:#333;">Amount: ${formattedAmount}</p>
+                  <p style="margin:6px 0 0;color:#333;">Reference: ${reference}</p>
+                </div>
+                <p style="color:#333;line-height:1.6;">Regards,<br/><strong>The MyAvatar Studio Team</strong></p>
+              </div>
+            `,
+          },
+        ],
+      };
+
+      const emailRes = await fetch(SENDGRID_API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${SENDGRID_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(emailPayload),
+      });
+
+      if (!emailRes.ok) {
+        const errText = await emailRes.text();
+        console.error("Failed to send payment confirmation email:", errText);
+      }
+    } else {
+      console.warn("Skipping customer payment email: missing SENDGRID_API_KEY or customer email");
     }
 
     console.log("Order recorded for reference:", data.reference);

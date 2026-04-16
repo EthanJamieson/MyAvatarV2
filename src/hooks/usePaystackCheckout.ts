@@ -40,7 +40,7 @@ export const usePaystackCheckout = () => {
           email,
           amount,
           metadata: { product, customer_name: name },
-          callback_url: window.location.origin + "/pricing?payment=success",
+          callback_url: window.location.origin + "/payment-callback",
         },
       });
 
