@@ -81,13 +81,41 @@ Deno.serve(async (req) => {
 
     const SENDGRID_API_KEY = Deno.env.get("SENDGRID_API_KEY");
     const customerEmail = data.customer?.email || data.email;
-    if (SENDGRID_API_KEY && customerEmail) {
+    if (SENDGRID_API_KEY) {
       const customerName = metadata.customer_name || "there";
       const productName = metadata.product || "your selected package";
       const formattedAmount = `R${amountInRands.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
       const reference = data.reference || "N/A";
+      const paidAt = data.paid_at || new Date().toISOString();
 
-      const emailPayload = {
+      const studioNotificationPayload = {
+        personalizations: [{ to: [{ email: FROM_EMAIL }] }],
+        from: { email: FROM_EMAIL, name: FROM_NAME },
+        reply_to: customerEmail ? { email: customerEmail, name: customerName } : undefined,
+        subject: `New Paid Order: ${productName}`,
+        content: [
+          {
+            type: "text/html",
+            value: `
+              <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+                <h2 style="color:#0ea5e9;margin-bottom:12px;">New purchase received</h2>
+                <p style="color:#333;line-height:1.6;">A new payment has been completed on MyAvatar Studio.</p>
+                <div style="margin:20px 0;padding:14px;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;">
+                  <p style="margin:0 0 8px;color:#111;font-weight:bold;">Order details</p>
+                  <p style="margin:0;color:#333;">Customer: ${customerName}</p>
+                  <p style="margin:6px 0 0;color:#333;">Email: ${customerEmail || "N/A"}</p>
+                  <p style="margin:6px 0 0;color:#333;">Product: ${productName}</p>
+                  <p style="margin:6px 0 0;color:#333;">Amount: ${formattedAmount}</p>
+                  <p style="margin:6px 0 0;color:#333;">Reference: ${reference}</p>
+                  <p style="margin:6px 0 0;color:#333;">Paid at: ${paidAt}</p>
+                </div>
+              </div>
+            `,
+          },
+        ],
+      };
+
+      const customerConfirmationPayload = {
         personalizations: [{ to: [{ email: customerEmail }] }],
         from: { email: FROM_EMAIL, name: FROM_NAME },
         subject: "Payment received - MyAvatar Studio",
@@ -115,21 +143,39 @@ Deno.serve(async (req) => {
         ],
       };
 
-      const emailRes = await fetch(SENDGRID_API_URL, {
+      const studioEmailRes = await fetch(SENDGRID_API_URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${SENDGRID_API_KEY}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(emailPayload),
+        body: JSON.stringify(studioNotificationPayload),
       });
 
-      if (!emailRes.ok) {
-        const errText = await emailRes.text();
-        console.error("Failed to send payment confirmation email:", errText);
+      if (!studioEmailRes.ok) {
+        const errText = await studioEmailRes.text();
+        console.error("Failed to send studio payment notification email:", errText);
+      }
+
+      if (customerEmail) {
+        const customerEmailRes = await fetch(SENDGRID_API_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${SENDGRID_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(customerConfirmationPayload),
+        });
+
+        if (!customerEmailRes.ok) {
+          const errText = await customerEmailRes.text();
+          console.error("Failed to send payment confirmation email:", errText);
+        }
+      } else {
+        console.warn("Skipping customer payment email: missing customer email");
       }
     } else {
-      console.warn("Skipping customer payment email: missing SENDGRID_API_KEY or customer email");
+      console.warn("Skipping payment emails: missing SENDGRID_API_KEY");
     }
 
     console.log("Order recorded for reference:", data.reference);
