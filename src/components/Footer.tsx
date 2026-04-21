@@ -56,6 +56,7 @@ const Footer = () => (
           <h4 className="text-sm font-semibold text-foreground mb-3">Company</h4>
           <div className="space-y-2">
             <Link to="/about" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">About Us</Link>
+            <Link to="/policies" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">Policies</Link>
             <a href="mailto:studio@myavatar.co.za" className="block text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">Contact</a>
           </div>
         </div>

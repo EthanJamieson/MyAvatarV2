@@ -15,6 +15,7 @@ import GalleryDetail from "./pages/GalleryDetail.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogArticle from "./pages/BlogArticle.tsx";
 import Solutions from "./pages/Solutions.tsx";
+import Policies from "./pages/Policies.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import WhatsAppWidget from "./components/WhatsAppWidget.tsx";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogArticle />} />
           <Route path="/solutions" element={<Solutions />} />
+          <Route path="/policies" element={<Policies />} />
           
           <Route path="*" element={<NotFound />} />
         </Routes>
