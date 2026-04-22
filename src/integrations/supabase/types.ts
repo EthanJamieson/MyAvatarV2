@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_otp_challenges: {
+        Row: {
+          attempts: number
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          otp_hash: string
+          username: string
+        }
+        Insert: {
+          attempts?: number
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          otp_hash: string
+          username: string
+        }
+        Update: {
+          attempts?: number
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          otp_hash?: string
+          username?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount_in_rands: number
@@ -52,6 +82,51 @@ export type Database = {
           paystack_reference?: string
           paystack_status?: string
           product?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pricing_plans: {
+        Row: {
+          amount_in_rands: number
+          category: string
+          created_at: string
+          description: string
+          discount_percent: number | null
+          features: string[]
+          id: string
+          is_active: boolean
+          name: string
+          plan_key: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          amount_in_rands: number
+          category: string
+          created_at?: string
+          description: string
+          discount_percent?: number | null
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          name: string
+          plan_key: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_in_rands?: number
+          category?: string
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          name?: string
+          plan_key?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []

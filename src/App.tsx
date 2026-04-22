@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import About from "./pages/About.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import PaymentCallback from "./pages/PaymentCallback.tsx";
+import MyAdmin from "./pages/MyAdmin.tsx";
 
 
 import Roadmap from "./pages/Roadmap.tsx";
@@ -34,6 +35,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/about" element={<About />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/my-admin" element={<MyAdmin />} />
+          <Route path="/my-admin/" element={<MyAdmin />} />
           <Route path="/payment-callback" element={<PaymentCallback />} />
           <Route path="/upload" element={<Navigate to="/pricing" replace />} />
           

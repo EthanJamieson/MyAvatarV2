@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Phone, MapPin, Clock, MessageCircle, Building2, Users, Headphones, ChevronDown, Globe, PenTool, Zap, RefreshCw, Mic, Languages } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePaystackCheckout } from "@/hooks/usePaystackCheckout";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import Header from "@/components/Header";
@@ -15,55 +16,35 @@ import CheckoutDialog from "@/components/CheckoutDialog";
 
 const ease = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
-const videoPacks = [
-  {
-    name: "Single Video",
-    price: "R500",
-    amountInRands: 500,
+type PricingPlanRow = Tables<"pricing_plans">;
+
+const formatRand = (amount: number) => `R${Math.round(amount).toLocaleString("en-ZA")}`;
+const discountedAmount = (amount: number, discountPercent: number | null) =>
+  !discountPercent || discountPercent <= 0 ? amount : Math.round(amount * (1 - discountPercent / 100));
+
+const videoPlanMeta: Record<string, { period?: string; perUnit?: string; features: string[]; cta: string; featured?: boolean }> = {
+  "single-video": {
     period: "/video",
     features: ["1 video", "1080p resolution", "Basic voice cloning", "Email support"],
     cta: "Buy Now",
-    featured: false,
-    tagline: "Perfect for trying the service",
   },
-  {
-    name: "10-Pack",
-    price: "R4,000",
-    amountInRands: 4000,
-    period: "",
-    saving: "Save 20%",
+  "10-pack": {
     perUnit: "R400/video",
     features: ["10 videos", "Up to 4K resolution", "Advanced voice cloning", "Custom backgrounds", "Priority support"],
     cta: "Buy 10-Pack →",
-    featured: false,
-    tagline: "Great for consistent content",
   },
-  {
-    name: "25-Pack",
-    price: "R8,750",
-    amountInRands: 8750,
-    period: "",
-    saving: "Save 30%",
+  "25-pack": {
     perUnit: "R350/video",
     features: ["25 videos", "Up to 4K resolution", "Advanced voice cloning", "Custom backgrounds", "Brand kit included", "Priority support"],
     cta: "Buy 25-Pack →",
     featured: true,
-    tagline: "Best balance of value and scale",
   },
-  {
-    name: "50-Pack",
-    price: "R15,000",
-    amountInRands: 15000,
-    period: "",
-    saving: "Save 40%",
+  "50-pack": {
     perUnit: "R300/video",
     features: ["50 videos", "Up to 4K resolution", "Advanced voice cloning", "Custom backgrounds", "Brand kit included", "Dedicated support"],
     cta: "Buy 50-Pack →",
-    featured: false,
-    tagline: "Ideal for high-volume production",
   },
-];
-
+};
 
 const addOns = [
   { name: "Script Writing", price: "R200 – R500", amount: 200, icon: PenTool, note: "from R200" },
@@ -73,30 +54,18 @@ const addOns = [
   { name: "Foreign Language (Non-English)", price: "R500", amount: 500, icon: Languages },
 ];
 
-const tutorialPacks = [
-  {
-    name: "Beginner",
-    price: "R2,500",
-    amountInRands: 2500,
+const tutorialPlanMeta: Record<string, { features: string[]; featured?: boolean }> = {
+  "tutorial-beginner": {
     features: ["Getting started guide", "Voice upload basics", "Your first avatar video", "Email support"],
-    tagline: "Lead magnet / volume play",
   },
-  {
-    name: "Creator Pro",
-    price: "R4,000",
-    amountInRands: 4000,
+  "tutorial-creator-pro": {
     features: ["All Beginner content", "Advanced voice techniques", "Multi-scene workflows", "Custom background mastery", "Priority support"],
     featured: true,
-    tagline: "Most Popular",
   },
-  {
-    name: "Studio Master",
-    price: "R8,000",
-    amountInRands: 8000,
+  "tutorial-studio-master": {
     features: ["All Creator Pro content", "API integration guide", "Batch generation workflows", "Brand consistency training", "1-on-1 onboarding call"],
-    tagline: "Full mastery",
   },
-];
+};
 
 const enterpriseFeatures = [
   {
@@ -168,7 +137,8 @@ const Pricing = () => {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
-  const { openCheckout, closeCheckout, processPayment, loading, checkoutState, updateCheckout } = usePaystackCheckout();
+  const [pricingPlans, setPricingPlans] = useState<PricingPlanRow[]>([]);
+  const { openCheckout, closeCheckout, processPayment, loading, checkoutState } = usePaystackCheckout();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -176,6 +146,76 @@ const Pricing = () => {
       toast.success("Payment successful! We'll be in touch shortly.");
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      const { data, error } = await supabase
+        .from("pricing_plans")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+
+      if (error) {
+        console.error("Failed to load pricing plans:", error);
+        toast.error("Could not load latest pricing plans");
+        return;
+      }
+      setPricingPlans(data ?? []);
+    };
+
+    void fetchPlans();
+  }, []);
+
+  const videoPacks = useMemo(
+    () =>
+      pricingPlans
+        .filter((plan) => plan.category === "video")
+        .map((plan) => {
+          const meta = videoPlanMeta[plan.plan_key] ?? {
+            features: ["Custom package details available on request"],
+            cta: `Buy ${plan.name} →`,
+          };
+          const planFeatures = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : meta.features;
+          const finalAmount = discountedAmount(plan.amount_in_rands, plan.discount_percent);
+          return {
+            ...plan,
+            ...meta,
+            features: planFeatures,
+            amountInRands: finalAmount,
+            originalAmountInRands: plan.amount_in_rands,
+            originalPrice: formatRand(plan.amount_in_rands),
+            price: formatRand(finalAmount),
+            saving: plan.discount_percent ? `Save ${plan.discount_percent}%` : undefined,
+            tagline: plan.description,
+            featured: Boolean(meta.featured),
+          };
+        }),
+    [pricingPlans],
+  );
+
+  const tutorialPacks = useMemo(
+    () =>
+      pricingPlans
+        .filter((plan) => plan.category === "tutorial")
+        .map((plan) => {
+          const meta = tutorialPlanMeta[plan.plan_key] ?? {
+            features: ["Tailored training support"],
+          };
+          const planFeatures = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : meta.features;
+          const finalAmount = discountedAmount(plan.amount_in_rands, plan.discount_percent);
+          return {
+            ...plan,
+            ...meta,
+            features: planFeatures,
+            amountInRands: finalAmount,
+            originalAmountInRands: plan.amount_in_rands,
+            originalPrice: formatRand(plan.amount_in_rands),
+            price: formatRand(finalAmount),
+            tagline: plan.description,
+          };
+        }),
+    [pricingPlans],
+  );
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,7 +286,7 @@ const Pricing = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {videoPacks.map((pack, i) => (
               <motion.div
-                key={pack.name}
+                key={pack.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -265,7 +305,14 @@ const Pricing = () => {
                 )}
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{pack.name}</h3>
                 <div className="mb-1">
-                  <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                  {pack.discount_percent ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground line-through">{pack.originalPrice}</span>
+                      <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                    </div>
+                  ) : (
+                    <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                  )}
                   {pack.period && <span className="text-muted-foreground text-sm">{pack.period}</span>}
                 </div>
                 {"perUnit" in pack && pack.perUnit && (
@@ -329,7 +376,7 @@ const Pricing = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl">
             {tutorialPacks.map((pack, i) => (
               <motion.div
-                key={pack.name}
+                key={pack.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -345,7 +392,14 @@ const Pricing = () => {
                 )}
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{pack.name}</h3>
                 <div className="mb-5">
-                  <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                  {pack.discount_percent ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm text-muted-foreground line-through">{pack.originalPrice}</span>
+                      <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                    </div>
+                  ) : (
+                    <span className="font-display text-3xl font-bold text-foreground">{pack.price}</span>
+                  )}
                 </div>
                 <ul className="space-y-2.5 mb-7 flex-1">
                   {pack.features.map((f) => (
