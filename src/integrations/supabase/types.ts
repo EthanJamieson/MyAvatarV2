@@ -21,7 +21,9 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
+          ip_hash: string | null
           otp_hash: string
+          user_agent_hash: string | null
           username: string
         }
         Insert: {
@@ -30,7 +32,9 @@ export type Database = {
           created_at?: string
           expires_at: string
           id?: string
+          ip_hash?: string | null
           otp_hash: string
+          user_agent_hash?: string | null
           username: string
         }
         Update: {
@@ -39,7 +43,86 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
+          ip_hash?: string | null
           otp_hash?: string
+          user_agent_hash?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      admin_audit_events: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          ip_hash: string | null
+          session_id: string | null
+          user_agent_hash: string | null
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          ip_hash?: string | null
+          session_id?: string | null
+          user_agent_hash?: string | null
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          ip_hash?: string | null
+          session_id?: string | null
+          user_agent_hash?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "admin_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_hash: string | null
+          last_seen_at: string
+          revoked_at: string | null
+          session_hash: string
+          user_agent_hash: string | null
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          revoked_at?: string | null
+          session_hash: string
+          user_agent_hash?: string | null
+          username: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          revoked_at?: string | null
+          session_hash?: string
+          user_agent_hash?: string | null
           username?: string
         }
         Relationships: []

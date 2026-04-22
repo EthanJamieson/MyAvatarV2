@@ -1,11 +1,21 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.99.2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
 const encoder = new TextEncoder();
+const SESSION_COOKIE = "myavatar_admin_session";
+
+const buildCorsHeaders = (req: Request) => {
+  const configuredOrigin = Deno.env.get("ADMIN_ALLOWED_ORIGIN")?.trim();
+  const reqOrigin = req.headers.get("origin") || "";
+  const allowOrigin = configuredOrigin || reqOrigin || "*";
+
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Credentials": "true",
+    "Vary": "Origin",
+  };
+};
 
 const hashText = async (value: string): Promise<string> => {
   const digest = await crypto.subtle.digest("SHA-256", encoder.encode(value));
@@ -14,67 +24,67 @@ const hashText = async (value: string): Promise<string> => {
     .join("");
 };
 
-const toBase64Url = (value: string): string =>
-  btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-
-const signToken = async (payload: Record<string, unknown>, secret: string) => {
-  const encodedPayload = toBase64Url(JSON.stringify(payload));
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const signatureBuffer = await crypto.subtle.sign("HMAC", key, encoder.encode(encodedPayload));
-  const signature = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
-
-  return `${encodedPayload}.${signature}`;
-};
-
-const json = (body: unknown, status = 200) =>
+const json = (body: unknown, status = 200, req?: Request, extraHeaders: Record<string, string> = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: {
+      ...buildCorsHeaders(req ?? new Request("https://example.com")),
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store",
+      ...extraHeaders,
+    },
   });
 
+const readIp = (req: Request) =>
+  req.headers.get("cf-connecting-ip") ||
+  req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  "unknown";
+
+const toBase64UrlBytes = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+
+const createSessionSecret = () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return toBase64UrlBytes(bytes);
+};
+
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: buildCorsHeaders(req) });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, req);
 
   try {
     const OTP_HASH_SECRET = Deno.env.get("OTP_HASH_SECRET");
-    const ADMIN_TOKEN_SECRET = Deno.env.get("ADMIN_TOKEN_SECRET");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const SESSION_TTL_SECONDS = Number(Deno.env.get("ADMIN_SESSION_TTL_SECONDS") || "3600");
 
-    if (!OTP_HASH_SECRET || !ADMIN_TOKEN_SECRET || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      return json({ error: "Admin verification function is not configured" }, 500);
+    if (!OTP_HASH_SECRET || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return json({ error: "Admin verification function is not configured" }, 500, req);
     }
 
     const body = await req.json();
     const username = typeof body?.username === "string" ? body.username.trim() : "";
     const code = typeof body?.code === "string" ? body.code.trim() : "";
-    if (!username || !/^\d{6}$/.test(code)) return json({ error: "Valid username and 6-digit code are required" }, 400);
+    if (!username || !/^\d{6}$/.test(code)) return json({ error: "Valid username and 6-digit code are required" }, 400, req);
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const nowIso = new Date().toISOString();
+    const ipHash = await hashText(`${readIp(req)}:${OTP_HASH_SECRET}`);
+    const userAgentHash = await hashText(`${req.headers.get("user-agent") || "unknown"}:${OTP_HASH_SECRET}`);
 
     const { data: challenge, error: challengeError } = await supabase
       .from("admin_otp_challenges")
-      .select("id, otp_hash, expires_at, attempts, consumed_at")
+      .select("id, otp_hash, expires_at, attempts, consumed_at, ip_hash")
       .eq("username", username)
       .is("consumed_at", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (challengeError || !challenge) return json({ error: "No active verification challenge found" }, 401);
-    if (challenge.expires_at < nowIso) return json({ error: "Verification code has expired" }, 401);
-    if (challenge.attempts >= 5) return json({ error: "Too many invalid attempts" }, 429);
+    if (challengeError || !challenge) return json({ error: "No active verification challenge found" }, 401, req);
+    if (challenge.expires_at < nowIso) return json({ error: "Verification code has expired" }, 401, req);
+    if (challenge.attempts >= 5) return json({ error: "Too many invalid attempts" }, 429, req);
+    if (challenge.ip_hash && challenge.ip_hash !== ipHash) return json({ error: "Verification context mismatch" }, 401, req);
 
     const suppliedHash = await hashText(`${code}:${OTP_HASH_SECRET}`);
     if (suppliedHash !== challenge.otp_hash) {
@@ -82,7 +92,14 @@ Deno.serve(async (req) => {
         .from("admin_otp_challenges")
         .update({ attempts: challenge.attempts + 1 })
         .eq("id", challenge.id);
-      return json({ error: "Invalid verification code" }, 401);
+      await supabase.from("admin_audit_events").insert({
+        event_type: "login_failed",
+        username,
+        ip_hash: ipHash,
+        user_agent_hash: userAgentHash,
+        details: { stage: "otp" },
+      });
+      return json({ error: "Invalid verification code" }, 401, req);
     }
 
     await supabase
@@ -90,15 +107,50 @@ Deno.serve(async (req) => {
       .update({ consumed_at: nowIso, attempts: challenge.attempts + 1 })
       .eq("id", challenge.id);
 
-    const expiresAtMs = Date.now() + 60 * 60 * 1000;
-    const token = await signToken(
-      { sub: username, exp: Math.floor(expiresAtMs / 1000), iat: Math.floor(Date.now() / 1000) },
-      ADMIN_TOKEN_SECRET,
-    );
+    const expiresAtMs = Date.now() + SESSION_TTL_SECONDS * 1000;
+    const sessionSecret = createSessionSecret();
+    const sessionHash = await hashText(`${sessionSecret}:${OTP_HASH_SECRET}`);
 
-    return json({ token, expiresAt: new Date(expiresAtMs).toISOString() });
+    await supabase
+      .from("admin_sessions")
+      .update({ revoked_at: nowIso })
+      .eq("username", username)
+      .is("revoked_at", null);
+
+    const { data: sessionRow, error: sessionError } = await supabase
+      .from("admin_sessions")
+      .insert({
+        username,
+        session_hash: sessionHash,
+        expires_at: new Date(expiresAtMs).toISOString(),
+        ip_hash: ipHash,
+        user_agent_hash: userAgentHash,
+        last_seen_at: nowIso,
+      })
+      .select("id")
+      .single();
+
+    if (sessionError) return json({ error: "Failed to create admin session" }, 500, req);
+
+    await supabase.from("admin_audit_events").insert({
+      event_type: "login_success",
+      username,
+      session_id: sessionRow.id,
+      ip_hash: ipHash,
+      user_agent_hash: userAgentHash,
+      details: { expiresAt: new Date(expiresAtMs).toISOString() },
+    });
+
+    const setCookie = `${SESSION_COOKIE}=${sessionSecret}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=${SESSION_TTL_SECONDS}`;
+
+    return json(
+      { success: true, expiresAt: new Date(expiresAtMs).toISOString() },
+      200,
+      req,
+      { "Set-Cookie": setCookie },
+    );
   } catch (err) {
     console.error("admin-login-verify error:", err);
-    return json({ error: "Unexpected error" }, 500);
+    return json({ error: "Unexpected error" }, 500, req);
   }
 });

@@ -1,13 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 type PricingPlan = Tables<"pricing_plans">;
-
-const SESSION_KEY = "myavatar_admin_session";
 
 const formatCurrency = (amount: number) => `R${amount.toLocaleString("en-ZA", { maximumFractionDigits: 0 })}`;
 
@@ -38,13 +35,46 @@ const textareaToFeatures = (raw: string) =>
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
 
+type AdminFunctionResult<T> = { data: T | null; error: string | null; status: number };
+
+const invokeAdminFunction = async <T,>(functionName: string, body: unknown): Promise<AdminFunctionResult<T>> => {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { data: null, error: "Supabase environment variables are missing", status: 500 };
+  }
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${supabaseAnonKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return {
+      data: null,
+      error: typeof payload?.error === "string" ? payload.error : "Request failed",
+      status: response.status,
+    };
+  }
+
+  return { data: payload as T, error: null, status: response.status };
+};
+
 const MyAdmin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [loginStep, setLoginStep] = useState<"credentials" | "otp">("credentials");
   const [loading, setLoading] = useState(false);
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [sessionExpiry, setSessionExpiry] = useState<string | null>(null);
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [savingPlanId, setSavingPlanId] = useState<string | null>(null);
@@ -57,58 +87,46 @@ const MyAdmin = () => {
   const [newPlanIsActive, setNewPlanIsActive] = useState(true);
   const [newPlanFeatures, setNewPlanFeatures] = useState("");
 
-  useEffect(() => {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (!raw) return;
-    try {
-      const parsed = JSON.parse(raw) as { token: string; expiresAt: string };
-      if (new Date(parsed.expiresAt).getTime() <= Date.now()) {
-        localStorage.removeItem(SESSION_KEY);
-        return;
+  const loadPlans = async () => {
+    const result = await invokeAdminFunction<{ plans: PricingPlan[] }>("admin-pricing", { action: "list" });
+    if (result.error) {
+      if (result.status === 401) {
+        setIsAuthenticated(false);
+        setPlans([]);
       }
-      setSessionToken(parsed.token);
-      setSessionExpiry(parsed.expiresAt);
-    } catch {
-      localStorage.removeItem(SESSION_KEY);
-    }
-  }, []);
-
-  const authHeaders = useMemo(() => {
-    if (!sessionToken) return undefined;
-    return { Authorization: `Bearer ${sessionToken}` };
-  }, [sessionToken]);
-
-  const loadPlans = async (tokenOverride?: string) => {
-    const authToken = tokenOverride ?? sessionToken;
-    if (!authToken) return;
-
-    const { data, error } = await supabase.functions.invoke("admin-pricing", {
-      headers: { Authorization: `Bearer ${authToken}` },
-      body: { action: "list" },
-    });
-
-    if (error) {
-      toast.error("Failed to load pricing plans");
+      toast.error(result.error || "Failed to load pricing plans");
       return;
     }
-    setPlans(Array.isArray(data?.plans) ? data.plans : []);
+    setPlans(Array.isArray(result.data?.plans) ? result.data.plans : []);
+  };
+
+  const checkSession = async () => {
+    const result = await invokeAdminFunction<{ authenticated: boolean; expiresAt: string }>("admin-pricing", { action: "session" });
+    if (result.error || !result.data?.authenticated) {
+      setIsAuthenticated(false);
+      setSessionExpiry(null);
+      setSessionReady(true);
+      return;
+    }
+    setIsAuthenticated(true);
+    setSessionExpiry(result.data.expiresAt);
+    await loadPlans();
+    setSessionReady(true);
   };
 
   useEffect(() => {
-    if (sessionToken) {
-      void loadPlans();
-    }
-  }, [sessionToken]);
+    void checkSession();
+  }, []);
 
   const handleStartLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error, data } = await supabase.functions.invoke("admin-login-start", {
-        body: { username: username.trim(), password },
+      const result = await invokeAdminFunction<{ success: boolean }>("admin-login-start", {
+        username: username.trim(),
+        password,
       });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || "Failed to start login");
+      if (result.error || !result.data?.success) throw new Error(result.error || "Failed to start login");
       setLoginStep("otp");
       toast.success("Verification code sent to studio@myavatar.co.za");
     } catch (err) {
@@ -123,16 +141,16 @@ const MyAdmin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error, data } = await supabase.functions.invoke("admin-login-verify", {
-        body: { username: username.trim(), code: otpCode.trim() },
+      const result = await invokeAdminFunction<{ success: boolean; expiresAt: string }>("admin-login-verify", {
+        username: username.trim(),
+        code: otpCode.trim(),
       });
-      if (error) throw error;
-      if (!data?.token || !data?.expiresAt) throw new Error("Verification failed");
+      if (result.error || !result.data?.success) throw new Error(result.error || "Verification failed");
 
-      localStorage.setItem(SESSION_KEY, JSON.stringify({ token: data.token, expiresAt: data.expiresAt }));
-      setSessionToken(data.token);
-      setSessionExpiry(data.expiresAt);
+      setIsAuthenticated(true);
+      setSessionExpiry(result.data.expiresAt);
       setOtpCode("");
+      await loadPlans();
       toast.success("Admin login successful");
     } catch (err) {
       console.error(err);
@@ -147,25 +165,20 @@ const MyAdmin = () => {
   };
 
   const savePlan = async (plan: PricingPlan) => {
-    if (!authHeaders) return;
     setSavingPlanId(plan.id);
     try {
-      const { data, error } = await supabase.functions.invoke("admin-pricing", {
-        headers: authHeaders,
-        body: {
-          action: "update",
-          id: plan.id,
-          name: plan.name,
-          description: plan.description,
-          amountInRands: plan.amount_in_rands,
-          discountPercent: plan.discount_percent,
-          features: plan.features,
-          isActive: plan.is_active,
-        },
+      const result = await invokeAdminFunction<{ plan: PricingPlan }>("admin-pricing", {
+        action: "update",
+        id: plan.id,
+        name: plan.name,
+        description: plan.description,
+        amountInRands: plan.amount_in_rands,
+        discountPercent: plan.discount_percent,
+        features: plan.features,
+        isActive: plan.is_active,
       });
-      if (error) throw error;
-      if (!data?.plan) throw new Error("No updated plan returned");
-      updatePlanField(plan.id, data.plan);
+      if (result.error || !result.data?.plan) throw new Error(result.error || "No updated plan returned");
+      updatePlanField(plan.id, result.data.plan);
       toast.success(`${plan.name} updated`);
     } catch (err) {
       console.error(err);
@@ -176,8 +189,10 @@ const MyAdmin = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem(SESSION_KEY);
-    setSessionToken(null);
+    void (async () => {
+      await invokeAdminFunction("admin-logout", {});
+    })();
+    setIsAuthenticated(false);
     setSessionExpiry(null);
     setPlans([]);
     setLoginStep("credentials");
@@ -189,27 +204,22 @@ const MyAdmin = () => {
 
   const createPlan = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authHeaders) return;
 
     setCreatingPlan(true);
     try {
-      const { data, error } = await supabase.functions.invoke("admin-pricing", {
-        headers: authHeaders,
-        body: {
-          action: "create",
-          category: activeCategory,
-          name: newPlanName,
-          description: newPlanDescription,
-          amountInRands: newPlanAmount,
-          discountPercent: newPlanDiscountPercent === "" ? null : Number(newPlanDiscountPercent),
-          features: textareaToFeatures(newPlanFeatures),
-          isActive: newPlanIsActive,
-        },
+      const result = await invokeAdminFunction<{ plan: PricingPlan }>("admin-pricing", {
+        action: "create",
+        category: activeCategory,
+        name: newPlanName,
+        description: newPlanDescription,
+        amountInRands: newPlanAmount,
+        discountPercent: newPlanDiscountPercent === "" ? null : Number(newPlanDiscountPercent),
+        features: textareaToFeatures(newPlanFeatures),
+        isActive: newPlanIsActive,
       });
-      if (error) throw error;
-      if (!data?.plan) throw new Error("No created plan returned");
+      if (result.error || !result.data?.plan) throw new Error(result.error || "No created plan returned");
 
-      setPlans((prev) => [...prev, data.plan as PricingPlan].sort((a, b) => a.sort_order - b.sort_order));
+      setPlans((prev) => [...prev, result.data.plan].sort((a, b) => a.sort_order - b.sort_order));
       setNewPlanName("");
       setNewPlanDescription("");
       setNewPlanAmount(0);
@@ -232,7 +242,11 @@ const MyAdmin = () => {
         <div className="container mx-auto px-6 max-w-5xl">
           <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-3">MyAvatar Admin</h1>
 
-          {!sessionToken ? (
+          {!sessionReady ? (
+            <div className="glass-card p-8 max-w-lg">
+              <p className="text-sm text-muted-foreground">Checking admin session...</p>
+            </div>
+          ) : !isAuthenticated ? (
             <div className="glass-card p-8 max-w-lg">
               {loginStep === "credentials" ? (
                 <form onSubmit={handleStartLogin} className="space-y-4">
