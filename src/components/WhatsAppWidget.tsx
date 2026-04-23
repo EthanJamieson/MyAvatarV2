@@ -7,7 +7,7 @@ const WHATSAPP_NUMBER = "27765877288";
 const WHATSAPP_URL = `https://web.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=Hi%2C%20I'm%20interested%20in%20MyAvatar%20services.`;
 const EMAIL_ADDRESS = "studio@myavatar.co.za";
 const TELEGRAM_URL = "https://t.me/+27765877288";
-const FACEBOOK_URL = "https://www.facebook.com/people/MyAvatar-Studios/61571986520641/";
+const FACEBOOK_URL = "https://www.facebook.com/profile.php?id=61567978731772";
 const LINKEDIN_URL = "https://www.linkedin.com/company/myavatar-studios/about/?viewAsMember=true";
 const TIKTOK_URL = "https://www.tiktok.com/@myavatar.studios";
 

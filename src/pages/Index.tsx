@@ -449,10 +449,7 @@ const Index = () => {
                 </div>
                 <div className="p-8 -mt-12 relative">
                   <h3 className="font-display text-2xl font-bold text-foreground mb-3">{uc.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">{uc.description}</p>
-                  <a href="#" className="text-primary text-sm font-medium hover:underline inline-flex items-center gap-1">
-                    See video example <span aria-hidden="true">→</span>
-                  </a>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{uc.description}</p>
                 </div>
               </motion.div>
             ))}

@@ -9,7 +9,7 @@ const TikTokIcon = ({ className }: { className?: string }) => (
 );
 
 const socialLinks = [
-  { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/people/MyAvatar-Studios/61571986520641/" },
+  { name: "Facebook", icon: Facebook, href: "https://www.facebook.com/profile.php?id=61567978731772" },
   { name: "LinkedIn", icon: Linkedin, href: "https://www.linkedin.com/company/myavatar-studios/about/?viewAsMember=true" },
   { name: "TikTok", icon: TikTokIcon, href: "https://www.tiktok.com/@myavatar.studios" },
   { name: "WhatsApp", icon: MessageCircle, href: "https://web.whatsapp.com/send?phone=27765877288&text=Hi%2C%20I'm%20interested%20in%20MyAvatar%20services." },
