@@ -12,6 +12,10 @@ const calculateDiscountedAmount = (amount: number, discountPercent: number | nul
   if (!discountPercent || discountPercent <= 0) return amount;
   return Math.round(amount * (1 - discountPercent / 100));
 };
+const formatExpiryPreview = (plan: PricingPlan) => {
+  if (plan.discount_mode !== "expires" || !plan.discount_expires_at) return null;
+  return new Date(plan.discount_expires_at).toLocaleString();
+};
 
 const getErrorMessage = async (error: unknown, fallback: string) => {
   if (error && typeof error === "object" && "context" in error) {
@@ -174,6 +178,9 @@ const MyAdmin = () => {
         description: plan.description,
         amountInRands: plan.amount_in_rands,
         discountPercent: plan.discount_percent,
+        discountMode: plan.discount_mode,
+        durationUnit: plan.discount_duration_unit,
+        durationValue: plan.discount_duration_value,
         features: plan.features,
         isActive: plan.is_active,
       });
@@ -500,6 +507,59 @@ const MyAdmin = () => {
                           placeholder="No discount"
                         />
                       </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1.5">Discount duration</label>
+                        <select
+                          value={plan.discount_mode || "always"}
+                          onChange={(e) =>
+                            updatePlanField(plan.id, {
+                              discount_mode: e.target.value === "expires" ? "expires" : "always",
+                              discount_duration_unit: e.target.value === "expires" ? (plan.discount_duration_unit || "days") : null,
+                              discount_duration_value: e.target.value === "expires" ? (plan.discount_duration_value || 1) : null,
+                              discount_expires_at: e.target.value === "expires" ? plan.discount_expires_at : null,
+                            })
+                          }
+                          className="w-full bg-muted/50 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        >
+                          <option value="always">Always</option>
+                          <option value="expires">Expires after duration</option>
+                        </select>
+                      </div>
+                      {plan.discount_mode === "expires" && (
+                        <>
+                          <div>
+                            <label className="text-xs text-muted-foreground block mb-1.5">Duration unit</label>
+                            <select
+                              value={plan.discount_duration_unit || "days"}
+                              onChange={(e) =>
+                                updatePlanField(plan.id, {
+                                  discount_duration_unit: e.target.value === "hours" ? "hours" : "days",
+                                })
+                              }
+                              className="w-full bg-muted/50 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            >
+                              <option value="hours">Hours</option>
+                              <option value="days">Days</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground block mb-1.5">Duration value</label>
+                            <input
+                              type="number"
+                              min={1}
+                              max={3650}
+                              step="1"
+                              value={plan.discount_duration_value ?? 1}
+                              onChange={(e) =>
+                                updatePlanField(plan.id, {
+                                  discount_duration_value: Number(e.target.value),
+                                })
+                              }
+                              className="w-full bg-muted/50 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                          </div>
+                        </>
+                      )}
                       <div className="flex items-end">
                         <p className="text-sm text-muted-foreground">
                           Old:{" "}
@@ -509,6 +569,15 @@ const MyAdmin = () => {
                           New: <span className="text-foreground font-semibold">{formatCurrency(discountedAmount)}</span>
                         </p>
                       </div>
+                      {plan.discount_mode === "expires" && (
+                        <div className="md:col-span-2">
+                          <p className="text-xs text-muted-foreground">
+                            {formatExpiryPreview(plan)
+                              ? `Current expiry: ${formatExpiryPreview(plan)}`
+                              : "Expiry will be recalculated when you save this plan."}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mt-5">

@@ -40,6 +40,36 @@ const parseFeatures = (raw: unknown): string[] => {
   }
   return [];
 };
+const parseDiscountDuration = (body: Record<string, unknown>) => {
+  const discountMode = body?.discountMode === "expires" ? "expires" : "always";
+  const durationUnitRaw = body?.durationUnit;
+  const durationUnit = durationUnitRaw === "hours" || durationUnitRaw === "days" ? durationUnitRaw : null;
+  const durationValueRaw = body?.durationValue;
+  const durationValue = durationValueRaw === null || durationValueRaw === undefined || durationValueRaw === ""
+    ? null
+    : Number(durationValueRaw);
+
+  if (discountMode === "expires") {
+    if (!durationUnit) return { error: "Duration unit must be hours or days" };
+    if (!Number.isFinite(durationValue) || (durationValue ?? 0) <= 0) return { error: "Duration value must be greater than 0" };
+    if ((durationValue ?? 0) > 3650) return { error: "Duration value is too large" };
+
+    const expiresAt = new Date(Date.now() + (durationUnit === "hours" ? durationValue! * 60 * 60 * 1000 : durationValue! * 24 * 60 * 60 * 1000)).toISOString();
+    return {
+      discountMode,
+      durationUnit,
+      durationValue: Math.trunc(durationValue!),
+      discountExpiresAt: expiresAt,
+    };
+  }
+
+  return {
+    discountMode: "always" as const,
+    durationUnit: null,
+    durationValue: null,
+    discountExpiresAt: null,
+  };
+};
 
 const json = (body: unknown, status = 200, req?: Request) =>
   new Response(JSON.stringify(body), {
@@ -133,6 +163,20 @@ const sendPricingChangeEmail = async ({
   }
 };
 
+const addAuditEvent = async (
+  supabase: ReturnType<typeof createClient>,
+  payload: {
+    event_type: string;
+    username: string | null;
+    session_id: string | null;
+    ip_hash: string | null;
+    user_agent_hash: string | null;
+    details: Record<string, unknown>;
+  },
+) => {
+  await supabase.from("admin_audit_events").insert(payload);
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: buildCorsHeaders(req) });
 
@@ -182,7 +226,7 @@ Deno.serve(async (req) => {
     if (listRequested) {
       const { data, error } = await supabase
         .from("pricing_plans")
-        .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, features, is_active, sort_order, created_at, updated_at")
+        .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, discount_mode, discount_expires_at, discount_duration_unit, discount_duration_value, features, is_active, sort_order, created_at, updated_at")
         .order("sort_order", { ascending: true });
 
       if (error) return json({ error: "Failed to load pricing plans" }, 500, req);
@@ -190,6 +234,7 @@ Deno.serve(async (req) => {
     }
 
     if (updateRequested) {
+      const typedBody = (body ?? {}) as Record<string, unknown>;
       const id = typeof body?.id === "string" ? body.id : "";
       const name = typeof body?.name === "string" ? body.name.trim() : "";
       const description = typeof body?.description === "string" ? body.description.trim() : "";
@@ -197,6 +242,8 @@ Deno.serve(async (req) => {
       const discountPercentRaw = body?.discountPercent;
       const isActive = Boolean(body?.isActive);
       const features = parseFeatures(body?.features);
+      const discountDuration = parseDiscountDuration(typedBody);
+      if ("error" in discountDuration) return json({ error: discountDuration.error }, 400, req);
 
       let discountPercent: number | null = null;
       if (discountPercentRaw !== null && discountPercentRaw !== undefined && discountPercentRaw !== "") {
@@ -210,10 +257,13 @@ Deno.serve(async (req) => {
       if (!id || !name || !description || !Number.isFinite(amountInRands) || amountInRands < 0) {
         return json({ error: "Invalid plan input" }, 400, req);
       }
+      if (discountDuration.discountMode === "expires" && (!discountPercent || discountPercent <= 0)) {
+        return json({ error: "Timed discounts require a discount percent greater than 0" }, 400, req);
+      }
 
       const { data: existingPlan } = await supabase
         .from("pricing_plans")
-        .select("name, category, description, amount_in_rands, discount_percent, is_active, features")
+        .select("name, category, description, amount_in_rands, discount_percent, discount_mode, discount_expires_at, discount_duration_unit, discount_duration_value, is_active, features")
         .eq("id", id)
         .maybeSingle();
 
@@ -224,12 +274,16 @@ Deno.serve(async (req) => {
           description,
           amount_in_rands: amountInRands,
           discount_percent: discountPercent && discountPercent > 0 ? discountPercent : null,
+          discount_mode: (discountPercent && discountPercent > 0) ? discountDuration.discountMode : "always",
+          discount_expires_at: (discountPercent && discountPercent > 0) ? discountDuration.discountExpiresAt : null,
+          discount_duration_unit: (discountPercent && discountPercent > 0) ? discountDuration.durationUnit : null,
+          discount_duration_value: (discountPercent && discountPercent > 0) ? discountDuration.durationValue : null,
           features,
           is_active: isActive,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)
-        .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, features, is_active, sort_order, created_at, updated_at")
+        .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, discount_mode, discount_expires_at, discount_duration_unit, discount_duration_value, features, is_active, sort_order, created_at, updated_at")
         .single();
 
       if (error) return json({ error: "Failed to update plan" }, 500, req);
@@ -240,11 +294,13 @@ Deno.serve(async (req) => {
         if (existingPlan.description !== data.description) changes.push("description changed");
         if (Number(existingPlan.amount_in_rands) !== Number(data.amount_in_rands)) changes.push(`amount_in_rands: ${existingPlan.amount_in_rands} -> ${data.amount_in_rands}`);
         if (Number(existingPlan.discount_percent ?? 0) !== Number(data.discount_percent ?? 0)) changes.push(`discount_percent: ${existingPlan.discount_percent ?? 0} -> ${data.discount_percent ?? 0}`);
+        if ((existingPlan.discount_mode ?? "always") !== (data.discount_mode ?? "always")) changes.push(`discount_mode: ${existingPlan.discount_mode ?? "always"} -> ${data.discount_mode ?? "always"}`);
+        if ((existingPlan.discount_expires_at ?? null) !== (data.discount_expires_at ?? null)) changes.push("discount_expires_at updated");
         if (existingPlan.is_active !== data.is_active) changes.push(`is_active: ${existingPlan.is_active} -> ${data.is_active}`);
         if (JSON.stringify(existingPlan.features ?? []) !== JSON.stringify(data.features ?? [])) changes.push("features updated");
       }
 
-      await supabase.from("admin_audit_events").insert({
+      await addAuditEvent(supabase, {
         event_type: "plan_updated",
         username: session.username,
         session_id: session.id,
@@ -264,7 +320,7 @@ Deno.serve(async (req) => {
             changes,
           });
         } catch (emailErr) {
-          await supabase.from("admin_audit_events").insert({
+          await addAuditEvent(supabase, {
             event_type: "plan_email_failed",
             username: session.username,
             session_id: session.id,
@@ -331,7 +387,7 @@ Deno.serve(async (req) => {
             sort_order: nextSortOrder,
             updated_at: new Date().toISOString(),
           })
-          .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, features, is_active, sort_order, created_at, updated_at")
+          .select("id, plan_key, category, name, description, amount_in_rands, discount_percent, discount_mode, discount_expires_at, discount_duration_unit, discount_duration_value, features, is_active, sort_order, created_at, updated_at")
           .single();
 
         if (!error) {
@@ -357,7 +413,7 @@ Deno.serve(async (req) => {
         features: string[];
       };
 
-      await supabase.from("admin_audit_events").insert({
+      await addAuditEvent(supabase, {
         event_type: "plan_created",
         username: session.username,
         session_id: session.id,
@@ -382,7 +438,7 @@ Deno.serve(async (req) => {
             ],
           });
         } catch (emailErr) {
-          await supabase.from("admin_audit_events").insert({
+          await addAuditEvent(supabase, {
             event_type: "plan_email_failed",
             username: session.username,
             session_id: session.id,

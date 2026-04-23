@@ -174,6 +174,10 @@ export type Database = {
           amount_in_rands: number
           category: string
           created_at: string
+          discount_duration_unit: string | null
+          discount_duration_value: number | null
+          discount_expires_at: string | null
+          discount_mode: string
           description: string
           discount_percent: number | null
           features: string[]
@@ -188,6 +192,10 @@ export type Database = {
           amount_in_rands: number
           category: string
           created_at?: string
+          discount_duration_unit?: string | null
+          discount_duration_value?: number | null
+          discount_expires_at?: string | null
+          discount_mode?: string
           description: string
           discount_percent?: number | null
           features?: string[]
@@ -202,6 +210,10 @@ export type Database = {
           amount_in_rands?: number
           category?: string
           created_at?: string
+          discount_duration_unit?: string | null
+          discount_duration_value?: number | null
+          discount_expires_at?: string | null
+          discount_mode?: string
           description?: string
           discount_percent?: number | null
           features?: string[]

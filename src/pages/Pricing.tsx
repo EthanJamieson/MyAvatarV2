@@ -21,6 +21,20 @@ type PricingPlanRow = Tables<"pricing_plans">;
 const formatRand = (amount: number) => `R${Math.round(amount).toLocaleString("en-ZA")}`;
 const discountedAmount = (amount: number, discountPercent: number | null) =>
   !discountPercent || discountPercent <= 0 ? amount : Math.round(amount * (1 - discountPercent / 100));
+const getDiscountTimeLeftLabel = (discountExpiresAt: string | null, nowMs: number): string | null => {
+  if (!discountExpiresAt) return null;
+  const remainingMs = new Date(discountExpiresAt).getTime() - nowMs;
+  if (remainingMs <= 0) return null;
+
+  const totalMinutes = Math.ceil(remainingMs / (60 * 1000));
+  if (totalMinutes < 60) return `${totalMinutes} minute${totalMinutes === 1 ? "" : "s"} left`;
+
+  const totalHours = Math.ceil(totalMinutes / 60);
+  if (totalHours < 48) return `${totalHours} hour${totalHours === 1 ? "" : "s"} left`;
+
+  const totalDays = Math.ceil(totalHours / 24);
+  return `${totalDays} day${totalDays === 1 ? "" : "s"} left`;
+};
 
 const videoPlanMeta: Record<string, { period?: string; perUnit?: string; features: string[]; cta: string; featured?: boolean }> = {
   "single-video": {
@@ -137,6 +151,7 @@ const Pricing = () => {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [pricingPlans, setPricingPlans] = useState<PricingPlanRow[]>([]);
   const { openCheckout, closeCheckout, processPayment, loading, checkoutState } = usePaystackCheckout();
   const [searchParams] = useSearchParams();
@@ -166,6 +181,11 @@ const Pricing = () => {
     void fetchPlans();
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const videoPacks = useMemo(
     () =>
       pricingPlans
@@ -175,8 +195,13 @@ const Pricing = () => {
             features: ["Custom package details available on request"],
             cta: `Buy ${plan.name} →`,
           };
+          const timedDiscountStillActive =
+            plan.discount_mode !== "expires" ||
+            !plan.discount_expires_at ||
+            new Date(plan.discount_expires_at).getTime() > nowMs;
+          const effectiveDiscountPercent = timedDiscountStillActive ? plan.discount_percent : null;
           const planFeatures = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : meta.features;
-          const finalAmount = discountedAmount(plan.amount_in_rands, plan.discount_percent);
+          const finalAmount = discountedAmount(plan.amount_in_rands, effectiveDiscountPercent);
           return {
             ...plan,
             ...meta,
@@ -185,12 +210,16 @@ const Pricing = () => {
             originalAmountInRands: plan.amount_in_rands,
             originalPrice: formatRand(plan.amount_in_rands),
             price: formatRand(finalAmount),
-            saving: plan.discount_percent ? `Save ${plan.discount_percent}%` : undefined,
+            discount_percent: effectiveDiscountPercent,
+            saving: effectiveDiscountPercent ? `Save ${effectiveDiscountPercent}%` : undefined,
+            discountTimeLeftLabel: effectiveDiscountPercent
+              ? getDiscountTimeLeftLabel(plan.discount_expires_at, nowMs)
+              : null,
             tagline: plan.description,
             featured: Boolean(meta.featured),
           };
         }),
-    [pricingPlans],
+    [pricingPlans, nowMs],
   );
 
   const tutorialPacks = useMemo(
@@ -201,8 +230,13 @@ const Pricing = () => {
           const meta = tutorialPlanMeta[plan.plan_key] ?? {
             features: ["Tailored training support"],
           };
+          const timedDiscountStillActive =
+            plan.discount_mode !== "expires" ||
+            !plan.discount_expires_at ||
+            new Date(plan.discount_expires_at).getTime() > nowMs;
+          const effectiveDiscountPercent = timedDiscountStillActive ? plan.discount_percent : null;
           const planFeatures = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : meta.features;
-          const finalAmount = discountedAmount(plan.amount_in_rands, plan.discount_percent);
+          const finalAmount = discountedAmount(plan.amount_in_rands, effectiveDiscountPercent);
           return {
             ...plan,
             ...meta,
@@ -211,10 +245,14 @@ const Pricing = () => {
             originalAmountInRands: plan.amount_in_rands,
             originalPrice: formatRand(plan.amount_in_rands),
             price: formatRand(finalAmount),
+            discount_percent: effectiveDiscountPercent,
+            discountTimeLeftLabel: effectiveDiscountPercent
+              ? getDiscountTimeLeftLabel(plan.discount_expires_at, nowMs)
+              : null,
             tagline: plan.description,
           };
         }),
-    [pricingPlans],
+    [pricingPlans, nowMs],
   );
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -303,6 +341,9 @@ const Pricing = () => {
                 {pack.saving && (
                   <span className="text-primary text-xs font-mono font-semibold mb-2">{pack.saving}</span>
                 )}
+                {pack.discountTimeLeftLabel && (
+                  <span className="text-muted-foreground text-xs font-mono mb-2">{pack.discountTimeLeftLabel}</span>
+                )}
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{pack.name}</h3>
                 <div className="mb-1">
                   {pack.discount_percent ? (
@@ -389,6 +430,9 @@ const Pricing = () => {
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
                     Most Popular
                   </span>
+                )}
+                {pack.discountTimeLeftLabel && (
+                  <p className="text-muted-foreground text-xs font-mono mb-2">{pack.discountTimeLeftLabel}</p>
                 )}
                 <h3 className="font-display text-lg font-semibold text-foreground mb-2">{pack.name}</h3>
                 <div className="mb-5">
