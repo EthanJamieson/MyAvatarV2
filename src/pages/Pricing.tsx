@@ -21,6 +21,11 @@ type PricingPlanRow = Tables<"pricing_plans">;
 const formatRand = (amount: number) => `R${Math.round(amount).toLocaleString("en-ZA")}`;
 const discountedAmount = (amount: number, discountPercent: number | null) =>
   !discountPercent || discountPercent <= 0 ? amount : Math.round(amount * (1 - discountPercent / 100));
+const getVideosPerPlan = (planKey: string): number | null => {
+  if (planKey === "single-video") return 1;
+  const match = planKey.match(/^(\d+)-pack$/);
+  return match ? Number(match[1]) : null;
+};
 const getDiscountTimeLeftLabel = (discountExpiresAt: string | null, nowMs: number): string | null => {
   if (!discountExpiresAt) return null;
   const remainingMs = new Date(discountExpiresAt).getTime() - nowMs;
@@ -202,6 +207,9 @@ const Pricing = () => {
           const effectiveDiscountPercent = timedDiscountStillActive ? plan.discount_percent : null;
           const planFeatures = Array.isArray(plan.features) && plan.features.length > 0 ? plan.features : meta.features;
           const finalAmount = discountedAmount(plan.amount_in_rands, effectiveDiscountPercent);
+          const videosInPlan = getVideosPerPlan(plan.plan_key);
+          const perUnitPrice =
+            videosInPlan && videosInPlan > 1 ? `${formatRand(finalAmount / videosInPlan)}/video` : meta.perUnit;
           return {
             ...plan,
             ...meta,
@@ -212,6 +220,7 @@ const Pricing = () => {
             price: formatRand(finalAmount),
             discount_percent: effectiveDiscountPercent,
             saving: effectiveDiscountPercent ? `Save ${effectiveDiscountPercent}%` : undefined,
+            perUnit: perUnitPrice,
             discountTimeLeftLabel: effectiveDiscountPercent
               ? getDiscountTimeLeftLabel(plan.discount_expires_at, nowMs)
               : null,
