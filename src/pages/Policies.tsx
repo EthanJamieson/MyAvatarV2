@@ -13,7 +13,7 @@ Privacy Policy
 Effective Date: 1 May 2025
 Version: 1.0
 Governing Entity: MyAvatar (Pty) Ltd
-Contact: legal@myavatar.ai
+Contact: studio@myavatar.co.za
 
 
 1. Introduction
@@ -24,7 +24,7 @@ This policy applies to all users worldwide and is designed to comply with the Ge
 
 2. Data Controller
 
-MyAvatar (Pty) Ltd is the data controller for personal information processed through the Service. Our designated Information Officer can be reached at privacy@myavatar.ai.
+MyAvatar (Pty) Ltd is the data controller for personal information processed through the Service.
 
 3. Information We Collect
 
@@ -118,7 +118,7 @@ Depending on your jurisdiction, you may have the following rights regarding your
 •	Withdraw Consent: Withdraw consent at any time where processing is based on consent.
 •	Non-Discrimination (CCPA): The right not to be discriminated against for exercising your privacy rights.
 
-To exercise your rights, contact us at privacy@myavatar.ai. We will respond within 30 days (or as required by applicable law).
+To exercise your rights, contact us at studio@myavatar.co.za. We will respond within 30 days (or as required by applicable law).
 
 10. Security
 
@@ -130,11 +130,11 @@ We implement industry-standard security measures to protect your data, including
 •	Role-based access controls and audit logging;
 •	Regular security assessments and penetration testing.
 
-Despite these measures, no system is completely secure. Please notify us immediately at security@myavatar.ai if you suspect a security breach.
+Despite these measures, no system is completely secure. Please notify us immediately at studio@myavatar.co.za if you suspect a security breach.
 
 11. Children's Privacy
 
-The Service is not directed to individuals under the age of 18. We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us at privacy@myavatar.ai and we will take immediate steps to delete it.
+The Service is not directed to individuals under the age of 18. We do not knowingly collect personal data from children. If you believe we have inadvertently collected data from a child, please contact us at studio@myavatar.co.za and we will take immediate steps to delete it.
 
 12. Updates to This Policy
 
@@ -144,9 +144,7 @@ We may update this Privacy Policy from time to time. We will notify you of mater
 
 For privacy-related enquiries:
 
-•	Email: privacy@myavatar.ai
-•	Information Officer: [Name], MyAvatar (Pty) Ltd
-•	Address: [Street Address], [City], South Africa
+•	Email: studio@myavatar.co.za
 
 If you are in the EEA and believe we have not addressed your concern, you have the right to lodge a complaint with your local supervisory authority. In South Africa, complaints may be directed to the Information Regulator at inforeg.org.za.`;
 
@@ -155,7 +153,7 @@ Terms of Service
 Effective Date: 1 May 2025
 Version: 1.0
 Governing Entity: MyAvatar (Pty) Ltd
-Contact: legal@myavatar.ai
+Contact: studio@myavatar.co.za
 
 
 1. Introduction and Acceptance
@@ -189,7 +187,7 @@ To access certain features of the Service, you must create an account. You agree
 •	Maintain and promptly update your account information;
 •	Keep your login credentials confidential and not share them with third parties;
 •	Accept responsibility for all activities that occur under your account; and
-•	Notify us immediately at security@myavatar.ai of any unauthorised use of your account.
+•	Notify us immediately at studio@myavatar.co.za of any unauthorised use of your account.
 
 MyAvatar reserves the right to suspend or terminate accounts that provide inaccurate, fraudulent, or incomplete information.
 
@@ -237,7 +235,7 @@ MyAvatar operates on a pay-per-video credit model. Credits are purchased in adva
 
 7.2 Pricing
 
-Current pricing, credit packs, and any applicable taxes are detailed on our Pricing page at myavatar.ai/pricing. Prices are subject to change with reasonable notice.
+Current pricing, credit packs, and any applicable taxes are detailed on our Pricing page at myavatar.co.za/pricing. Prices are subject to change with reasonable notice.
 
 7.3 No Subscriptions
 
@@ -249,7 +247,7 @@ You are responsible for all applicable taxes, levies, and duties associated with
 
 7.5 Billing Disputes
 
-Any billing disputes must be raised within 30 days of the charge. Please contact billing@myavatar.ai.
+Any billing disputes must be raised within 30 days of the charge. Please contact studio@myavatar.co.za.
 
 8. Acceptable Use
 
@@ -309,16 +307,15 @@ Notwithstanding the above, MyAvatar may seek injunctive or other equitable relie
 
 For questions about these Terms, please contact:
 
-•	Email: legal@myavatar.ai
-•	Address: MyAvatar (Pty) Ltd, [Street Address], [City], South Africa
-•	Website: myavatar.ai/legal`;
+•	Email: studio@myavatar.co.za
+•	Website: myavatar.co.za`;
 
 const refundPolicyText = `MyAvatar
 Refund Policy
 Effective Date: 1 May 2025
 Version: 1.0
 Governing Entity: MyAvatar (Pty) Ltd
-Contact: legal@myavatar.ai
+Contact: studio@myavatar.co.za
 
 
 1. Overview
@@ -355,7 +352,7 @@ Refunds will not be issued in the following circumstances:
 If a rendering job fails due to a MyAvatar platform error:
 
 •	Credits consumed by the failed job will be automatically reinstated to your account within 24 hours;
-•	If automatic reinstatement does not occur, please contact support@myavatar.ai with your Job ID and account email;
+•	If automatic reinstatement does not occur, please contact studio@myavatar.co.za with your Job ID and account email;
 •	We may require a minimum of 3 business days to investigate and process credit reinstatements.
 
 Note: Failed jobs resulting from user-submitted content issues (e.g., unsuitable file formats, content policy violations, or insufficient input quality) are not eligible for credit reinstatement.
@@ -364,7 +361,7 @@ Note: Failed jobs resulting from user-submitted content issues (e.g., unsuitable
 
 To request a refund or credit reinstatement, please follow these steps:
 
-•	Step 1: Email billing@myavatar.ai with the subject line "Refund Request – [Your Account Email]";
+•	Step 1: Email studio@myavatar.co.za with the subject line "Refund Request – [Your Account Email]";
 •	Step 2: Include your account email, the date of purchase, the amount charged, and a description of the issue;
 •	Step 3: Attach any supporting documentation (e.g., payment receipts, error screenshots, Job IDs);
 •	Step 4: Allow up to 10 business days for our team to investigate and respond.
@@ -398,7 +395,7 @@ Where your statutory rights provide greater protection than this policy, your st
 
 7. Disputes
 
-If you are unsatisfied with our response to your refund request, you may escalate the matter by emailing legal@myavatar.ai. We are committed to resolving disputes fairly and in good faith.
+If you are unsatisfied with our response to your refund request, you may escalate the matter by emailing studio@myavatar.co.za. We are committed to resolving disputes fairly and in good faith.
 
 8. Changes to This Policy
 
@@ -406,8 +403,7 @@ We may update this Refund Policy from time to time. Changes will be posted to ou
 
 9. Contact
 
-•	Email: billing@myavatar.ai
-•	Support Portal: myavatar.ai/support
+•	Email: studio@myavatar.co.za
 •	Response Time: Within 3 business days`;
 
 const acceptableUsePolicyText = `MyAvatar
@@ -415,7 +411,7 @@ Acceptable Use Policy
 Effective Date: 1 May 2025
 Version: 1.0
 Governing Entity: MyAvatar (Pty) Ltd
-Contact: legal@myavatar.ai
+Contact: studio@myavatar.co.za
 
 
 1. Purpose
@@ -507,7 +503,7 @@ You must not:
 
 If you become aware of any use of the MyAvatar Service that violates this AUP, please report it to:
 
-•	Email: abuse@myavatar.ai
+•	Email: studio@myavatar.co.za
 •	Subject Line: "AUP Violation Report"
 
 We investigate all reports in good faith and maintain whistleblower confidentiality where reasonably possible.
