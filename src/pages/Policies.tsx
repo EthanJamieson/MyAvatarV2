@@ -8,6 +8,615 @@ type PolicySection = {
   content: string[];
 };
 
+const biometricPolicyText = `MyAvatar
+Biometric Data & Likeness Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Introduction
+
+MyAvatar's core service involves the creation of photorealistic AI Avatars from Likeness Data — including your facial geometry, voice, and other biometric identifiers. This Biometric Data & Likeness Policy ("Biometric Policy") supplements our Privacy Policy and specifically addresses how we collect, process, store, and delete this highly sensitive category of data.
+
+We recognise that biometric and likeness data deserves the highest level of care and transparency. This policy is designed to comply with the Illinois Biometric Information Privacy Act (BIPA), the EU AI Act, GDPR special category data provisions, the Protection of Personal Information Act (POPIA), and equivalent laws in other jurisdictions.
+
+2. Definitions
+
+•	"Biometric Data" means physiological data used to uniquely identify you, including facial geometry maps, voice prints, and lip-sync motion data.
+•	"Likeness Data" means any visual, audio, or physical characteristic submitted to create an Avatar, including photographs, video recordings, and voice samples.
+•	"Avatar Model" means the trained digital representation derived from your Likeness Data.
+•	"Digital Twin" means a personalised Avatar Model capable of rendering your likeness in photorealistic video.
+
+3. What Biometric and Likeness Data We Collect
+
+When you use MyAvatar to create an Avatar, we collect and process the following:
+
+•	Facial geometry data derived from submitted images or video;
+•	Voice recordings and extracted voice characteristics for voice synthesis;
+•	Lip movement and facial expression data for lip-sync and animation;
+•	Skin tone, texture, and physical feature data necessary for photorealistic rendering.
+
+We collect only the minimum Likeness Data necessary to deliver the requested Avatar quality.
+4. Consent
+
+Your explicit, informed consent is required before we collect or process any Biometric or Likeness Data. Specifically:
+
+•	Consent is obtained through a clear, affirmative action (a dedicated consent checkbox) during the Avatar creation process;
+•	The consent form describes exactly what data is collected, how it is used, how long it is retained, and your rights;
+•	Consent is required separately from your acceptance of our Terms of Service;
+•	You may withdraw consent at any time, subject to Section 7 (Deletion and Withdrawal of Consent) below.
+
+If you are creating an Avatar based on another person's likeness, you must obtain and retain written consent from that person before submitting their data. You are legally responsible for that consent.
+
+5. How We Use Your Likeness Data
+
+5.1 Primary Use
+
+Your Likeness Data is used solely to:
+
+•	Generate and render your personalised Avatar;
+•	Animate and synchronise your Avatar with supplied audio or scripts; and
+•	Produce the final video Output as requested.
+
+5.2 AI Model Training
+
+We do not use your identifiable Likeness Data or Avatar Model to train our AI models without your separate, explicit opt-in consent. You will be asked independently if you wish to participate in our model improvement programme. This is entirely optional and has no effect on the quality of your Avatar.
+
+5.3 Prohibited Uses
+
+We will never:
+
+•	Sell, lease, or trade your Biometric or Likeness Data to third parties;
+•	Use your likeness for advertising or promotional purposes without your express written permission;
+•	Share your Likeness Data beyond the sub-processors required to deliver the Service.
+
+6. Storage and Security
+
+6.1 Encryption
+
+All Biometric and Likeness Data is encrypted at rest using AES-256 and in transit using TLS 1.3. Your Avatar Model is stored in an encrypted, access-controlled environment isolated from general platform data.
+
+6.2 Access Controls
+
+Access to Biometric and Likeness Data is strictly limited to authorised personnel on a need-to-know basis. All access is logged and audited.
+
+6.3 Infrastructure
+
+Data is processed and stored in Tier-3 certified data centres with 24/7 physical security, redundant power, and environmental controls.
+
+6.4 Sub-Processors
+
+A limited number of sub-processors (such as GPU rendering infrastructure providers) may process your data on our behalf. All sub-processors are bound by data processing agreements with equivalent data protection standards. A current list of sub-processors is available in our Sub-Processor Policy.
+
+7. Retention and Deletion
+
+7.1 Default Retention
+
+Likeness Data and Avatar Models are retained for as long as your account is active and for up to 90 days following account closure, to allow for any final processing or dispute resolution.
+
+7.2 Withdrawal of Consent and Deletion Requests
+
+You may request deletion of your Biometric Data and Avatar Model at any time by:
+
+•	Using the "Delete My Avatar" option in your account settings dashboard; or
+•	Emailing studio@myavatar.co.za with the subject "Biometric Data Deletion Request."
+
+Upon a verified deletion request, we will permanently delete your Biometric Data, Likeness Data, and Avatar Model from our systems within 30 days, and confirm deletion in writing.
+
+
+7.3 Exceptions
+
+Deletion may be delayed or limited where required by law, active legal proceedings, or fraud investigations. We will inform you of any such limitations.
+
+8. Your Rights
+
+In addition to the rights described in our Privacy Policy, with respect to your Biometric and Likeness Data you have the right to:
+
+•	Know exactly what Biometric Data we have collected about you;
+•	Receive a copy of your stored Likeness Data in a portable format;
+•	Request correction of inaccurately stored biometric information;
+•	Demand deletion and receive written confirmation (Illinois BIPA, GDPR Article 17);
+•	Object to any use of your Likeness Data for model training at any time; and
+•	Withdraw consent to Biometric Data processing at any time.
+
+9. Children
+
+We do not collect Biometric or Likeness Data from any person under the age of 18. If we discover that a child's Likeness Data has been submitted without parental consent, we will immediately delete it and notify you.
+
+10. Jurisdiction-Specific Rights
+
+Illinois (BIPA)
+
+If you are a resident of Illinois, USA, you have specific rights under the Illinois Biometric Information Privacy Act, including the right to know the specific purpose and length of term for which your biometric data is being collected and the right to have your biometric data destroyed in accordance with the retention schedules described herein.
+
+European Union (GDPR)
+
+Biometric data constitutes special category data under GDPR Article 9. We process such data only with your explicit consent. You may lodge complaints with your national supervisory authority.
+
+South Africa (POPIA)
+
+Special personal information, including biometric data, is processed in compliance with POPIA Section 26 and 27, requiring explicit consent and legitimate purpose.
+11. Contact
+
+For questions or requests related to your Biometric or Likeness Data:
+
+•	Email: studio@myavatar.co.za
+•	Subject Line: "Biometric Data Enquiry"
+•	Response Time: Within 10 business days`;
+
+const aiDisclosurePolicyText = `MyAvatar
+AI-Generated Content Disclosure Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Purpose
+
+This AI-Generated Content Disclosure Policy ("Disclosure Policy") establishes MyAvatar's commitments and requirements regarding the transparent disclosure of AI-generated content. As a producer of synthetic media, MyAvatar is committed to promoting transparency, combating disinformation, and complying with emerging laws and platform requirements worldwide.
+
+2. Regulatory Context
+
+This policy is designed to support compliance with:
+
+•	EU AI Act (Regulation (EU) 2024/1689): Articles 50 and 52 require that AI-generated audio, image, and video content be marked in a machine-readable format and disclosed to viewers;
+•	FTC Guidelines (USA): Require clear and conspicuous disclosure of AI-generated commercial content;
+•	Digital Services Act (EU): Transparency obligations for very large online platforms hosting AI content;
+•	National laws in an increasing number of jurisdictions requiring disclosure of synthetic media, particularly in political advertising and news.
+
+3. MyAvatar's Disclosure Commitments
+
+3.1 Technical Watermarking
+
+All video Outputs generated by MyAvatar are embedded with:
+
+•	An invisible, robust digital watermark encoding the AI origin, generation timestamp, and MyAvatar platform identifier;
+•	Content Authenticity Initiative (CAI) / C2PA provenance metadata where technically supported, enabling third-party verification of AI origin.
+
+
+3.2 Visual Disclosure
+
+Outputs exported for public distribution include an optional visible disclosure label. We strongly recommend enabling the "AI-Generated" badge overlay before publishing to social or broadcast media.
+
+3.3 Platform Metadata
+
+Downloadable Outputs include embedded metadata (EXIF/XMP fields) indicating AI origin, generation date, and platform attribution, compatible with emerging platform verification systems (Meta, YouTube, TikTok).
+
+4. User Disclosure Obligations
+
+By using the MyAvatar Service, you agree to the following disclosure obligations when publishing or distributing Outputs:
+
+4.1 General Publishing
+
+•	Clearly disclose that any publicly shared Output is AI-generated, using language such as "AI-Generated Video" or "Created with MyAvatar AI";
+•	Do not remove, alter, or obscure watermarks or provenance metadata embedded in Outputs;
+•	Comply with the disclosure policies of any platform on which you publish Outputs.
+
+4.2 Commercial Advertising
+
+•	All AI-generated content used in commercial advertising must include clear, prominent disclosure as required by applicable advertising standards (ASA, FTC, etc.);
+•	Disclosures must appear at the start of video advertisements or in a clearly visible position throughout.
+
+4.3 News and Journalistic Content
+
+•	AI-generated video content must never be presented as authentic news footage without express disclosure;
+•	Any use of MyAvatar Outputs in journalism or documentary content requires clear identification as AI-generated.
+
+4.4 Political Content
+
+•	AI-generated political content must include a disclosure label in accordance with applicable electoral laws;
+•	In jurisdictions where AI disclosure in political advertising is legally mandated, you are solely responsible for compliance.
+
+5. Prohibited Misuse of Outputs
+
+You may not:
+
+•	Publish Outputs in a manner designed to deceive viewers about whether the content is real or AI-generated;
+•	Remove or circumvent MyAvatar's watermarking or provenance metadata;
+•	Use Outputs in contexts where the absence of disclosure could cause material harm (e.g., fabricated news, fraud, evidence manipulation);
+•	Represent AI-generated Outputs as authentic evidence in legal, regulatory, or judicial proceedings.
+
+6. Content Authenticity and Verification
+
+MyAvatar participates in and supports the Content Authenticity Initiative (CAI) and the Coalition for Content Provenance and Authenticity (C2PA). Where technically feasible, Outputs include signed C2PA manifests that allow any viewer to independently verify:
+
+•	That the content was AI-generated;
+•	The date and time of generation;
+•	The platform and model used; and
+•	Whether the content has been altered after generation.
+
+7. Complaints and Enforcement
+
+If you become aware of MyAvatar-generated content being distributed without appropriate disclosure, please report it to:
+
+•	Email: studio@myavatar.co.za
+•	Subject: "Undisclosed AI Content Report"
+
+Users who violate this Disclosure Policy are subject to account suspension, content removal, and legal action in accordance with our Acceptable Use Policy and Terms of Service.
+
+
+
+
+8. Policy Updates
+
+This Disclosure Policy will be updated as regulatory requirements evolve globally. We commit to monitoring and responding to changes in the AI content disclosure regulatory landscape, including new guidance from the EU AI Office, FTC, and other bodies.`;
+
+const ipOwnershipPolicyText = `MyAvatar
+Intellectual Property & Avatar Ownership Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Purpose
+
+This Intellectual Property & Avatar Ownership Policy clarifies who owns what when you use MyAvatar to create AI Avatars, what rights you receive to the Outputs, what rights MyAvatar retains, and what you can and cannot do with the content you generate.
+
+We believe in clarity: you should know exactly what you own before you publish, commercialise, or share your Avatar content.
+
+2. Ownership of Input Content
+
+2.1 Your Content
+
+You retain full ownership of all original content you upload to the Service, including source photographs, video recordings, voice samples, scripts, and any other materials you provide ("Input Content").
+
+2.2 Licence to MyAvatar
+
+By uploading Input Content, you grant MyAvatar a limited, non-exclusive, royalty-free licence to process, reproduce, and modify your Input Content solely for the purpose of providing the requested Service to you. This licence does not permit MyAvatar to use your Input Content for any other purpose without your separate consent.
+
+3. Ownership of AI-Generated Outputs
+
+3.1 General Rule
+
+Subject to your compliance with these Terms and payment of applicable credits, you own the creative Outputs you generate using the MyAvatar Service. "Output" means the final rendered video or asset delivered to you.
+
+
+3.2 Licence Grant to You
+
+MyAvatar grants you a perpetual, worldwide, royalty-free, non-exclusive licence to use, reproduce, display, distribute, and create derivative works from your Outputs for both personal and commercial purposes, subject to the restrictions set out in Section 5.
+
+3.3 Limitations on Ownership Claim
+
+MyAvatar makes no representation that AI-generated Outputs are eligible for copyright protection in every jurisdiction. In some jurisdictions, copyright law may not protect content that lacks sufficient human authorship. You are responsible for obtaining independent legal advice regarding the copyright status of Outputs in your jurisdiction.
+
+4. MyAvatar's Retained Rights
+
+4.1 Technology and Platform
+
+MyAvatar owns all intellectual property rights in:
+
+•	The AI models, neural rendering technology, and algorithms used to generate Avatars;
+•	The underlying Avatar model architecture (as distinct from your personalised Avatar Model);
+•	The MyAvatar platform, interface, branding, and proprietary tooling;
+•	All improvements, developments, and derivative works of MyAvatar's technology.
+
+4.2 Anonymised Data
+
+MyAvatar may retain and use aggregated, anonymised, de-identified data derived from rendering operations to improve our AI systems. This data does not identify you individually and is not subject to the ownership restrictions in this policy.
+
+4.3 Opt-In Training Data
+
+If you choose to participate in our optional model improvement programme, you grant MyAvatar an additional licence to use your Likeness Data and Outputs as training data, on terms described in the opt-in consent form.
+
+5. What You Can Do With Outputs
+
+With the licence granted in Section 3.2, you may:
+
+•	Use Outputs in your own personal or professional video content;
+•	Publish Outputs on social media, YouTube, TikTok, and other platforms (subject to those platforms' terms);
+•	Use Outputs in commercial advertising, marketing, and corporate presentations;
+•	Broadcast Outputs on television, streaming platforms, or at live events;
+•	License Outputs to third parties as part of your creative work or service delivery.
+
+6. What You Cannot Do With Outputs
+
+You may not:
+
+•	Claim that Outputs were produced entirely by human effort without AI, in any context where that claim would be material or deceptive;
+•	Resell or sublicense raw Avatar Models (the trained AI model of a person's likeness) as a standalone product;
+•	Use Outputs to misrepresent the identity or statements of any real person (see Acceptable Use Policy);
+•	Remove watermarks, C2PA provenance data, or any MyAvatar attribution embedded in Outputs;
+•	Use Outputs to train competing AI systems or commercial AI models without prior written agreement with MyAvatar;
+•	Use Outputs in violation of any applicable law, including defamation, privacy, intellectual property, or consumer protection laws.
+
+7. Third-Party Intellectual Property
+
+You are solely responsible for ensuring that:
+
+•	Any music, text, images, or other third-party content included in your rendering inputs does not infringe third-party intellectual property rights;
+•	You hold the necessary licences, permissions, and consents for all third-party content used alongside MyAvatar Outputs; and
+•	Your Outputs do not infringe any trade mark, copyright, publicity right, or other proprietary right of any third party.
+
+MyAvatar accepts no liability for third-party IP infringement arising from your Outputs.
+
+8. Personalised Avatar Model Ownership
+
+Your personalised Avatar Model (the trained digital representation derived from your Likeness Data) is linked to your account. Key points:
+
+•	The Avatar Model is stored securely in your account and may not be transferred, exported, or commercialised as a standalone asset without a separate Enterprise Agreement;
+•	You may delete your Avatar Model at any time via your account settings;
+•	Upon account deletion or expiry, your Avatar Model is deleted in accordance with the Biometric Data & Likeness Policy.
+
+9. Feedback and Suggestions
+
+If you submit feedback, feature requests, or ideas to MyAvatar, you acknowledge that MyAvatar may use such feedback for any purpose without compensation or attribution to you, and such feedback will not be treated as confidential.
+
+10. Disputes
+
+Any intellectual property disputes shall be resolved in accordance with the governing law and dispute resolution provisions of MyAvatar's Terms of Service. For IP-related enquiries, contact studio@myavatar.co.za.`;
+
+const cookiePolicyText = `MyAvatar
+Cookie Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Introduction
+
+This Cookie Policy explains how MyAvatar (Pty) Ltd uses cookies and similar tracking technologies on our website and platform (myavatar.ai). This policy is designed to comply with the GDPR, EU ePrivacy Directive, and equivalent laws in other jurisdictions.
+
+By clicking "Accept All" on our cookie banner, you consent to our use of cookies as described in this policy.
+
+2. What Are Cookies?
+
+Cookies are small text files placed on your device when you visit a website. They allow the website to recognise your device on subsequent visits and remember information about your preferences and interactions. Similar technologies include:
+
+•	Local Storage and Session Storage: Browser-based storage mechanisms used to retain data between sessions;
+•	Pixel Tags / Web Beacons: Tiny image files that track user interactions with emails or web pages;
+•	Device Fingerprinting: Technical methods of identifying devices based on browser and hardware characteristics.
+
+3. Categories of Cookies We Use
+
+3.1 Strictly Necessary Cookies
+
+These cookies are essential for the platform to function and cannot be switched off. They are set in response to your actions (e.g., logging in, setting privacy preferences, completing payments).
+
+•	Session authentication cookies;
+•	CSRF protection tokens;
+•	Load balancing and security cookies.
+
+Legal basis: Legitimate interest / essential to service delivery. No consent required.
+
+3.2 Functional Cookies
+
+These cookies enable enhanced features and personalisation, such as remembering your language preference, rendering quality settings, and account preferences.
+
+Legal basis: Consent (where required).
+
+3.3 Analytics Cookies
+
+These cookies allow us to understand how visitors interact with our platform, enabling us to improve performance and user experience. We use tools such as:
+
+•	Google Analytics 4 (anonymised IP addresses);
+•	Mixpanel (user interaction tracking);
+•	Hotjar (session recording and heatmaps — opt-in only).
+
+Legal basis: Consent.
+
+3.4 Marketing and Advertising Cookies
+
+These cookies track your browsing activity across websites to enable relevant advertising and measure campaign effectiveness. Third parties (such as Google Ads and Meta Pixel) may set these cookies.
+
+Legal basis: Consent.
+
+3.5 Third-Party Cookies
+
+Some third-party services integrated into our platform may set their own cookies. We do not control these cookies. Please refer to those third parties' privacy policies for details.
+
+4. Cookie Retention Periods
+
+•	Session Cookies: Deleted when you close your browser.
+•	Persistent Cookies: Retained for periods ranging from 30 days (analytics) to 2 years (marketing preferences), depending on the specific cookie.
+
+5. Managing Your Cookie Preferences
+
+5.1 Browser Settings
+
+Most browsers allow you to refuse cookies or delete cookies already stored. Browser-based cookie management typically covers:
+
+•	Chrome: Settings > Privacy and Security > Cookies;
+•	Firefox: Settings > Privacy & Security;
+•	Safari: Preferences > Privacy;
+•	Edge: Settings > Cookies and Site Permissions.
+
+Please note that disabling cookies may affect the functionality of the MyAvatar platform.
+
+5.2 Opt-Out Tools
+
+•	Google Analytics: tools.google.com/dlpage/gaoptout
+•	Your Online Choices (EU): youronlinechoices.eu
+•	Digital Advertising Alliance (USA): optout.aboutads.info
+
+6. Do Not Track
+
+Some browsers include a "Do Not Track" (DNT) feature. Our platform currently does not respond to DNT signals, as there is no uniform standard for how websites should respond.
+
+7. Updates to This Policy
+
+We may update this Cookie Policy as our use of cookies evolves or as regulations change. We will notify you of material changes through a cookie banner notice or email.
+
+8. Contact
+
+•	Email: studio@myavatar.co.za
+•	Cookie Settings: myavatar.co.za/cookie-settings`;
+
+const subProcessorPolicyText = `MyAvatar
+Sub-Processor Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Introduction
+
+In providing the MyAvatar Service, we engage certain third-party companies ("Sub-Processors") who process personal data on our behalf. This Sub-Processor Policy is provided in accordance with GDPR Article 28(3)(d) and equivalent provisions under other data protection laws.
+
+All Sub-Processors are required to enter into data processing agreements (DPAs) with MyAvatar and are bound by obligations no less protective than those we commit to under our Privacy Policy.
+
+2. Sub-Processor Selection and Due Diligence
+
+Before engaging any Sub-Processor, MyAvatar conducts due diligence to assess:
+
+•	Technical and organisational security measures;
+•	Data protection compliance and certifications (e.g., ISO 27001, SOC 2 Type II);
+•	Data residency and international transfer safeguards; and
+•	Incident response and breach notification procedures.
+
+3. Current Sub-Processors
+
+The following table lists our current Sub-Processors, the nature of processing, and the location of processing:
+
+3.1 Cloud Infrastructure & Compute
+
+•	Amazon Web Services (AWS) — Cloud hosting, storage, and GPU compute — USA (with global regions)
+•	Google Cloud Platform (GCP) — Backup storage and data processing — USA (with global regions)
+•	Cloudflare — CDN, DDoS protection, and edge security — Global
+
+3.2 Payment Processing
+
+•	Stripe, Inc. — Payment processing and billing — USA
+•	PayPal Holdings, Inc. — Alternative payment processing — USA
+
+3.3 Analytics and Monitoring
+
+•	Google Analytics (Google LLC) — Website and platform analytics — USA
+•	Mixpanel, Inc. — Product analytics — USA
+•	Sentry — Error tracking and performance monitoring — USA
+
+3.4 Customer Support
+
+•	Intercom, Inc. — Customer messaging and support — USA
+•	Zendesk, Inc. — Support ticket management — USA
+
+3.5 Email and Communications
+
+•	SendGrid (Twilio) — Transactional email delivery — USA
+•	Mailchimp (Intuit) — Marketing email (where applicable) — USA
+
+3.6 Security
+
+•	Auth0 (Okta) — Identity and authentication management — USA
+
+4. International Transfers
+
+Several of our Sub-Processors are located in countries outside the EEA. We ensure lawful transfer through:
+
+•	EU Standard Contractual Clauses (SCCs, 2021 version) incorporated into all relevant DPAs;
+•	Adequacy decisions where applicable; and
+•	Transfer Impact Assessments (TIAs) conducted for Sub-Processors in high-risk jurisdictions.
+
+5. Notification of Sub-Processor Changes
+
+We will provide at least 30 days' prior written notice to Enterprise customers before engaging a new Sub-Processor or making material changes to an existing Sub-Processor's role. Notice will be provided via:
+
+•	Email to your registered account address; and/or
+•	In-platform notifications for material changes.
+
+Free and standard tier users are subject to reasonable notice via our policy update mechanism.
+6. Objection Rights (GDPR)
+
+Enterprise customers who have executed a Data Processing Agreement with MyAvatar may object to the addition of a new Sub-Processor within the 30-day notice period by emailing studio@myavatar.co.za. We will work in good faith to accommodate objections, though we cannot guarantee that all objections can be accommodated without affecting Service delivery.
+
+7. Data Processing Agreements
+
+Enterprise customers may request a copy of MyAvatar's standard Data Processing Agreement (DPA) by contacting studio@myavatar.co.za. The DPA governs:
+
+•	Scope and nature of processing;
+•	Sub-processor obligations;
+•	Data subject rights assistance;
+•	Security and incident notification requirements; and
+•	Audit rights.
+
+8. Contact
+
+•	Email: studio@myavatar.co.za
+•	Subject: "Sub-Processor Enquiry"
+•	Data Protection Officer: dpo@myavatar.ai`;
+
+const dmcaPolicyText = `MyAvatar
+DMCA & Copyright Takedown Policy
+Effective Date: 1 May 2025
+Version: 1.0
+Governing Entity: MyAvatar (Pty) Ltd
+Contact: studio@myavatar.co.za
+
+
+1. Introduction
+
+MyAvatar respects intellectual property rights and expects users of our platform to do the same. This DMCA & Copyright Takedown Policy describes our process for receiving, evaluating, and acting on notices of alleged copyright infringement in accordance with the Digital Millennium Copyright Act (DMCA), 17 U.S.C. § 512, and equivalent international copyright frameworks.
+
+2. Reporting Copyright Infringement
+
+If you believe that content generated through or hosted on the MyAvatar platform infringes your copyright, please submit a written notice to our designated Copyright Agent containing the following:
+
+•	A physical or electronic signature of the copyright owner or a person authorised to act on their behalf;
+•	A description of the copyrighted work that you claim has been infringed;
+•	A description of the allegedly infringing material and sufficient information for us to locate it (e.g., URL or Job ID);
+•	Your contact information, including your name, address, telephone number, and email address;
+•	A statement that you have a good faith belief that the disputed use is not authorised by the copyright owner, their agent, or the law;
+•	A statement, made under penalty of perjury, that the information in your notice is accurate and that you are the copyright owner or are authorised to act on behalf of the copyright owner.
+
+3. Copyright Agent Contact Details
+
+•	Email: studio@myavatar.co.za
+•	Subject Line: "DMCA Takedown Notice"
+
+Please note that notices submitted via channels other than those above may not receive the attention or legal protection that a properly submitted DMCA notice receives.
+
+
+4. Our Response to Takedown Notices
+
+Upon receipt of a valid takedown notice, MyAvatar will:
+
+•	Promptly review the notice for completeness and validity;
+•	Remove or disable access to the allegedly infringing content as soon as reasonably practicable;
+•	Notify the user who uploaded or generated the content of the takedown;
+•	Maintain records of the notice in accordance with our legal obligations; and
+•	Where applicable, terminate the accounts of repeat infringers.
+
+5. Counter-Notice Procedure
+
+If you believe your content was removed or disabled as a result of a mistake or misidentification, you may submit a counter-notice to our Copyright Agent containing:
+
+•	Your physical or electronic signature;
+•	Identification of the material that was removed and its location before removal;
+•	A statement under penalty of perjury that you have a good faith belief that the material was removed by mistake or misidentification;
+•	Your name, address, telephone number, and email address; and
+•	A statement that you consent to jurisdiction in the applicable court and will accept service of process from the original complainant.
+
+Upon receipt of a valid counter-notice, we will provide a copy to the original complainant and may restore the content within 10–14 business days unless the complainant files a court action.
+
+6. Repeat Infringer Policy
+
+MyAvatar has a policy of terminating, in appropriate circumstances, the accounts of users who repeatedly infringe copyright. We will evaluate repeat infringement based on the number, nature, and validity of takedown notices received against a particular account.
+
+7. AI-Generated Content and Copyright
+
+MyAvatar acknowledges that the copyright status of AI-generated content is an evolving area of law. We note the following:
+
+•	AI-generated content may or may not attract copyright protection depending on the jurisdiction and the degree of human creative input;
+•	MyAvatar is not responsible for any third-party intellectual property rights that may be reflected in AI Outputs due to training data;
+•	Users are responsible for ensuring their use of Outputs does not infringe third-party rights.
+
+If you believe that MyAvatar's underlying AI models were trained on your copyrighted content and that this constitutes infringement, please contact studio@myavatar.co.za with the subject "AI Training Data Copyright Enquiry." We will review such enquiries on a case-by-case basis.
+
+8. Misrepresentation
+
+Please be aware that knowingly misrepresenting that content is infringing or that content was removed by mistake may expose you to civil liability under the DMCA, including damages, costs, and attorneys' fees.
+
+9. Contact
+
+•	Copyright Agent Email: studio@myavatar.co.za
+•	General Legal: studio@myavatar.co.za
+•	Response Time: Within 5 business days for valid notices`;
+
 const privacyPolicyText = `MyAvatar
 Privacy Policy
 Effective Date: 1 May 2025
@@ -529,9 +1138,34 @@ const policySections: PolicySection[] = [
     content: termsOfServiceText.split("\n\n"),
   },
   {
+    id: "biometric-data-likeness-policy",
+    title: "Biometric Data & Likeness Policy",
+    content: biometricPolicyText.split("\n\n"),
+  },
+  {
     id: "privacy-policy",
     title: "Privacy Policy",
     content: privacyPolicyText.split("\n\n"),
+  },
+  {
+    id: "ai-generated-content-disclosure-policy",
+    title: "AI-Generated Content Disclosure Policy",
+    content: aiDisclosurePolicyText.split("\n\n"),
+  },
+  {
+    id: "intellectual-property-avatar-ownership-policy",
+    title: "Intellectual Property & Avatar Ownership Policy",
+    content: ipOwnershipPolicyText.split("\n\n"),
+  },
+  {
+    id: "cookie-policy",
+    title: "Cookie Policy",
+    content: cookiePolicyText.split("\n\n"),
+  },
+  {
+    id: "sub-processor-policy",
+    title: "Sub-Processor Policy",
+    content: subProcessorPolicyText.split("\n\n"),
   },
   {
     id: "refund-policy",
@@ -542,6 +1176,11 @@ const policySections: PolicySection[] = [
     id: "acceptable-use-policy",
     title: "Acceptable Use Policy",
     content: acceptableUsePolicyText.split("\n\n"),
+  },
+  {
+    id: "dmca-copyright-takedown-policy",
+    title: "DMCA & Copyright Takedown Policy",
+    content: dmcaPolicyText.split("\n\n"),
   },
 ];
 
@@ -566,7 +1205,7 @@ const Policies = () => {
             </p>
 
             <Tabs defaultValue={defaultPolicy} className="w-full">
-              <TabsList className="w-full h-auto grid grid-cols-2 md:grid-cols-4 gap-2 bg-muted/60 p-2">
+              <TabsList className="w-full h-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 bg-muted/60 p-2">
                 {policySections.map((policy) => (
                   <TabsTrigger key={policy.id} value={policy.id} className="w-full">
                     {policy.title}
@@ -583,8 +1222,8 @@ const Policies = () => {
                   <h2 className="font-display text-2xl font-semibold text-foreground">
                     {policy.title}
                   </h2>
-                  {policy.content.map((paragraph) => (
-                    <p key={paragraph} className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {policy.content.map((paragraph, idx) => (
+                    <p key={`${policy.id}-${idx}`} className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                       {paragraph}
                     </p>
                   ))}
