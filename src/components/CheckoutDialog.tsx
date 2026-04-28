@@ -32,7 +32,8 @@ interface CheckoutDialogProps {
 const CheckoutDialog = ({ isOpen, onClose, onSubmit, loading, productName, formattedPrice, baseAmount }: CheckoutDialogProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; terms?: string }>({});
   const [selectedAddOns, setSelectedAddOns] = useState<string[]>([]);
 
   const addOnsTotal = selectedAddOns.reduce((sum, n) => sum + (addOns.find((a) => a.name === n)?.amount ?? 0), 0);
@@ -42,6 +43,8 @@ const CheckoutDialog = ({ isOpen, onClose, onSubmit, loading, productName, forma
   useEffect(() => {
     if (isOpen) {
       setSelectedAddOns([]);
+      setAcceptedTerms(false);
+      setErrors({});
     }
   }, [isOpen]);
 
@@ -59,6 +62,10 @@ const CheckoutDialog = ({ isOpen, onClose, onSubmit, loading, productName, forma
       setErrors({ name: fieldErrors.name?.[0], email: fieldErrors.email?.[0] });
       return;
     }
+    if (!acceptedTerms) {
+      setErrors({ terms: "Please accept the Terms and Conditions to continue." });
+      return;
+    }
     setErrors({});
     const addOnNames = selectedAddOns.length ? ` + ${selectedAddOns.join(", ")}` : "";
     onSubmit(result.data.email, result.data.name, totalAmount, `${productName}${addOnNames}`);
@@ -70,6 +77,7 @@ const CheckoutDialog = ({ isOpen, onClose, onSubmit, loading, productName, forma
       setEmail("");
       setErrors({});
       setSelectedAddOns([]);
+      setAcceptedTerms(false);
       onClose();
     }
   };
@@ -155,9 +163,32 @@ const CheckoutDialog = ({ isOpen, onClose, onSubmit, loading, productName, forma
             {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
           </div>
 
+          <div className="space-y-1">
+            <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => {
+                  setAcceptedTerms(e.target.checked);
+                  setErrors((p) => ({ ...p, terms: undefined }));
+                }}
+                disabled={loading}
+                className="mt-0.5 accent-primary w-4 h-4 rounded"
+              />
+              <span>
+                I accept the{" "}
+                <a href="/policies" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Terms and Conditions
+                </a>
+                .
+              </span>
+            </label>
+            {errors.terms && <p className="text-sm text-destructive">{errors.terms}</p>}
+          </div>
+
           <button
             type="submit"
-            disabled={loading || !email || !name}
+            disabled={loading || !email || !name || !acceptedTerms}
             className="btn-press w-full py-3 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? (
