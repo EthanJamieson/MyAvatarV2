@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMemo, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type PolicySection = {
   id: string;
@@ -1186,6 +1187,11 @@ const policySections: PolicySection[] = [
 
 const Policies = () => {
   const defaultPolicy = policySections[0]?.id ?? "";
+  const [selectedPolicyId, setSelectedPolicyId] = useState(defaultPolicy);
+  const selectedPolicy = useMemo(
+    () => policySections.find((policy) => policy.id === selectedPolicyId) ?? policySections[0],
+    [selectedPolicyId],
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -1201,39 +1207,38 @@ const Policies = () => {
               Policies and Procedures
             </h1>
             <p className="text-muted-foreground mb-10">
-              Review all policy documents below. Use the tabs to navigate between each policy.
+              Review all policy documents below. Use the selector to view each policy.
             </p>
 
-            <Tabs defaultValue={defaultPolicy} className="w-full">
-              <TabsList className="h-auto w-full flex-wrap justify-start gap-2 rounded-xl bg-muted/60 p-2">
-                {policySections.map((policy) => (
-                  <TabsTrigger
-                    key={policy.id}
-                    value={policy.id}
-                    className="min-h-10 flex-1 basis-full sm:basis-[calc(50%-0.25rem)] lg:basis-[calc(33.333%-0.375rem)] whitespace-normal text-center leading-tight rounded-lg px-3 py-2 text-xs sm:text-sm"
-                  >
-                    {policy.title}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+            <div className="space-y-6">
+              <div className="max-w-xl">
+                <Select value={selectedPolicyId} onValueChange={setSelectedPolicyId}>
+                  <SelectTrigger className="h-11 rounded-xl bg-muted/60 border-border text-foreground">
+                    <SelectValue placeholder="Select a policy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {policySections.map((policy) => (
+                      <SelectItem key={policy.id} value={policy.id}>
+                        {policy.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-              {policySections.map((policy) => (
-                <TabsContent
-                  key={policy.id}
-                  value={policy.id}
-                  className="mt-6 glass-card p-6 md:p-8 space-y-4"
-                >
+              {selectedPolicy && (
+                <div className="glass-card p-6 md:p-8 space-y-4">
                   <h2 className="font-display text-2xl font-semibold text-foreground">
-                    {policy.title}
+                    {selectedPolicy.title}
                   </h2>
-                  {policy.content.map((paragraph, idx) => (
-                    <p key={`${policy.id}-${idx}`} className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {selectedPolicy.content.map((paragraph, idx) => (
+                    <p key={`${selectedPolicy.id}-${idx}`} className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                       {paragraph}
                     </p>
                   ))}
-                </TabsContent>
-              ))}
-            </Tabs>
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </main>
