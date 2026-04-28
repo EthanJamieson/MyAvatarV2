@@ -360,7 +360,7 @@ Contact: studio@myavatar.co.za
 
 1. Introduction
 
-This Cookie Policy explains how MyAvatar (Pty) Ltd uses cookies and similar tracking technologies on our website and platform (myavatar.ai). This policy is designed to comply with the GDPR, EU ePrivacy Directive, and equivalent laws in other jurisdictions.
+This Cookie Policy explains how MyAvatar (Pty) Ltd uses cookies and similar tracking technologies on our website and platform (myavatar.co.za). This policy is designed to comply with the GDPR, EU ePrivacy Directive, and equivalent laws in other jurisdictions.
 
 By clicking "Accept All" on our cookie banner, you consent to our use of cookies as described in this policy.
 
@@ -392,10 +392,8 @@ Legal basis: Consent (where required).
 
 3.3 Analytics Cookies
 
-These cookies allow us to understand how visitors interact with our platform, enabling us to improve performance and user experience. We use tools such as:
+These cookies allow us to understand how visitors interact with our platform, enabling us to improve performance and user experience. We currently use:
 
-•	Google Analytics 4 (anonymised IP addresses);
-•	Mixpanel (user interaction tracking);
 •	Hotjar (session recording and heatmaps — opt-in only).
 
 Legal basis: Consent.
@@ -444,8 +442,7 @@ We may update this Cookie Policy as our use of cookies evolves or as regulations
 
 8. Contact
 
-•	Email: studio@myavatar.co.za
-•	Cookie Settings: myavatar.co.za/cookie-settings`;
+•	Email: studio@myavatar.co.za`;
 
 const subProcessorPolicyText = `MyAvatar
 Sub-Processor Policy
@@ -474,36 +471,21 @@ Before engaging any Sub-Processor, MyAvatar conducts due diligence to assess:
 
 The following table lists our current Sub-Processors, the nature of processing, and the location of processing:
 
-3.1 Cloud Infrastructure & Compute
+3.1 Core Platform Infrastructure
 
-•	Amazon Web Services (AWS) — Cloud hosting, storage, and GPU compute — USA (with global regions)
-•	Google Cloud Platform (GCP) — Backup storage and data processing — USA (with global regions)
-•	Cloudflare — CDN, DDoS protection, and edge security — Global
+•	Supabase — Database, authentication, storage, and serverless functions — Regional cloud infrastructure (project-configured region)
 
 3.2 Payment Processing
 
-•	Stripe, Inc. — Payment processing and billing — USA
-•	PayPal Holdings, Inc. — Alternative payment processing — USA
+•	Paystack — Payment processing and transaction verification — South Africa / regional infrastructure
 
 3.3 Analytics and Monitoring
 
-•	Google Analytics (Google LLC) — Website and platform analytics — USA
-•	Mixpanel, Inc. — Product analytics — USA
-•	Sentry — Error tracking and performance monitoring — USA
+•	Hotjar — Website analytics, session insights, and UX monitoring (where enabled) — EU/Global infrastructure
 
-3.4 Customer Support
-
-•	Intercom, Inc. — Customer messaging and support — USA
-•	Zendesk, Inc. — Support ticket management — USA
-
-3.5 Email and Communications
+3.4 Email and Communications
 
 •	SendGrid (Twilio) — Transactional email delivery — USA
-•	Mailchimp (Intuit) — Marketing email (where applicable) — USA
-
-3.6 Security
-
-•	Auth0 (Okta) — Identity and authentication management — USA
 
 4. International Transfers
 
@@ -538,8 +520,7 @@ Enterprise customers may request a copy of MyAvatar's standard Data Processing A
 8. Contact
 
 •	Email: studio@myavatar.co.za
-•	Subject: "Sub-Processor Enquiry"
-•	Data Protection Officer: dpo@myavatar.ai`;
+•	Subject: "Sub-Processor Enquiry"`;
 
 const dmcaPolicyText = `MyAvatar
 DMCA & Copyright Takedown Policy
