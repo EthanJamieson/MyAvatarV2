@@ -1205,19 +1205,17 @@ const Policies = () => {
             </p>
 
             <Tabs defaultValue={defaultPolicy} className="w-full">
-              <div className="-mx-2 px-2 overflow-x-auto">
-                <TabsList className="h-auto w-max min-w-full justify-start gap-2 rounded-xl bg-muted/60 p-2">
-                  {policySections.map((policy) => (
-                    <TabsTrigger
-                      key={policy.id}
-                      value={policy.id}
-                      className="flex-shrink-0 rounded-lg px-3 py-2 text-xs sm:text-sm"
-                    >
-                      {policy.title}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
+              <TabsList className="h-auto w-full flex-wrap justify-start gap-2 rounded-xl bg-muted/60 p-2">
+                {policySections.map((policy) => (
+                  <TabsTrigger
+                    key={policy.id}
+                    value={policy.id}
+                    className="min-h-10 flex-1 basis-full sm:basis-[calc(50%-0.25rem)] lg:basis-[calc(33.333%-0.375rem)] whitespace-normal text-center leading-tight rounded-lg px-3 py-2 text-xs sm:text-sm"
+                  >
+                    {policy.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
               {policySections.map((policy) => (
                 <TabsContent
